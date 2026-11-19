@@ -1,5 +1,5 @@
 # SecHandCharity
-Repo for mini project handled by Jere, Loh, and Adam.
+Repo for mini project handled by Jere, Loh, and Adam, Ivan.
 
 
 # Please Follow:
