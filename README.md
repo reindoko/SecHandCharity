@@ -1,31 +1,20 @@
 # SecHandCharity
-Repo for mini project handled by Jere, Loh, and Adam, Ivan.
+Repo for final year mini project handled by Jere, Loh, Adam, Ivan.
 
 
-# Please Follow:
+# Team, Please Take Note:
 ## Github Branches
 - DO NOT TOUCH the "main" branch
-- If you want to work on something, please use your own "branch" and commit work there, and only edit files in your own "modules" part
-- The "branch" you're using will be shown at the bottom left of your VSCode, make sure its never on "main" and only on your branch
-- If you finished a big section of your module and its working correctly, you can submit a "pull request" inside GitHub and I'll check it.
-- If I merge the pull request, then please "commit" and "pull" from "main" and open a new branch for yourself and work there
-- Just ask Jere for help if you unsure about anything
+- Only work inside of your own branches thank you
+- Also only edit files within your own module folders, you may view outside files but no editing them
+- You will be informed if I need you to merge main into your branch for updates
 
-Example Steps:
-1. main > pull
-2. main > create new branch, example name: "feature/login-page", "feature/user-reviews"
-3. main > enter your branch
-4. feature/login-page > edit your own files in your "modules" folder
-5. feature/login-page > push & commit whenever you finish something
-6. feature/login-page > when big part all working and finished, tell Jere
-7. feature/login-page > submit a pull request
-8. main > your pull request got merged into main
-9. main > everyone commit their changes first then pull from main and repeat/continue
-
+## Database Information
+- You can find the tables and column names in the /database/schema.sql file
 
 ## Naming Conventions
 File names: Use kebab-case for names.
-Example: "user-profile.html", "item-listing.html"
+Example: "user-profile.html", "item-menu.html"
 
 HTML: kebab-case
 Example: "item-title-input"
@@ -42,10 +31,11 @@ Example: "card-title"
 }
 ```
 
-JavaScript: camelCase
-Example: "userEmail"
+JavaScript: camelCase & UPPERCASE_SNAKE_CASE
+Example: "userEmail" / "DEFAULT_NAME"
 ```js
 const userEmail = "xxx@gmail.com";
+const DEFAULT_NAME = "name";
 ```
 
 SQL: snake_case
@@ -58,9 +48,8 @@ CREATE TABLE item_listings (
 );
 ```
 
-
 ## Indentation
-Use 2 spaces for indenting, don't use Tab.
+Use 2 spaces for indenting
 Example:
 ```html
 <body>
@@ -68,4 +57,35 @@ Example:
     <h1>Hello World</h1>
   </div>
 </body>
+```
+
+## Template For HTML Files
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecHandCharity</title>
+
+  <!-- Styling -->
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+</head>
+<body>
+  <!-- Remove this whole <div> if you don't need the sidebar on this page -->
+  <div class="app-layout">
+    <aside id="sidebar"></aside>
+    <main class="main-content">
+      <!-- Your page content goes here -->
+      <h1>This is index.html!</h1>
+      
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="/assets/js/sidebar.js"></script>
+  <script type="module" src="/assets/js/script.js"></script>
+</body>
+</html>
 ```
