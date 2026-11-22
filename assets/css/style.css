@@ -1,3 +1,4 @@
+/* All elemnts */
 *,
 *::before,
 *::after {
@@ -10,4 +11,64 @@ body {
   font-family: sans-serif;
   background-color: #ffffff;
   color: #111111;
+}
+
+/* Hides element */
+.is-hidden {
+  display: none !important;
+}
+
+/* Searchable location dropdown */
+.location-combobox {
+  position: relative;
+}
+
+/* Dropdown style */
+.location-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 100%;
+  width: max-content;
+  max-width: 260px;
+  max-height: 190px;
+  overflow-y: auto;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 16px;
+  border: 1.5px solid #555555;
+  background-color: #ffffff;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+}
+
+/* Dropdown elements style */
+.location-combobox .location-option-item {
+  all: unset;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  padding: 7px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.25;
+  color: #111111;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Hover dropdown elements */
+.location-combobox .location-option-item:hover,
+.location-combobox .location-option-item:focus-visible {
+  background-color: rgba(148, 179, 117, 0.25);
+}
+
+/* Empty dropdown style */
+.location-combobox .location-option-empty {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  color: #666666;
+  white-space: nowrap;
 }

@@ -10,6 +10,7 @@ CREATE TABLE public.user_profiles (
   avatar_url text,
   role character varying NOT NULL DEFAULT 'user'::character varying,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
+  email character varying NOT NULL UNIQUE,
   CONSTRAINT user_profiles_pkey PRIMARY KEY (id),
   CONSTRAINT user_profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );

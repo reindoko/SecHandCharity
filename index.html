@@ -7,21 +7,28 @@
 
   <!-- Styling -->
   <link rel="stylesheet" href="/assets/css/style.css">
-  <link rel="stylesheet" href="/assets/css/sidebar.css">
 </head>
 <body>
-  <!-- Remove this whole <div> if you don't need the sidebar on this page -->
-  <div class="app-layout">
-    <aside id="sidebar"></aside>
-    <main class="main-content">
-      <!-- Your page content goes here -->
-      <h1>This is index.html!</h1>
-      
-    </main>
-  </div>
-
   <!-- Scripts -->
-  <script type="module" src="/assets/js/sidebar.js"></script>
-  <script type="module" src="/assets/js/script.js"></script>
+  <script type="module">
+    import { supabaseClient } from "/assets/js/supabase-client.js";
+    import { ensureUserProfile } from "/modules/account/auth.js";
+
+    try {
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
+      if (error) {
+        console.error("Failed to check session:", error.message);
+      }
+
+      if (session?.user) {
+        await ensureUserProfile(session.user);
+        window.location.replace("/modules/account/settings.html"); // Rename once loh finish catalogue
+      } else {
+        window.location.replace("/modules/account/login.html");
+      }
+    } catch (err) {
+      console.error("Initial route failed:", err);
+    }
+  </script>
 </body>
 </html>
