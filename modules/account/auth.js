@@ -187,7 +187,7 @@ function initLoginPage() {
       const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: new URL(CATALOGUE_URL, window.location.origin).href,
+          redirectTo: new URL("/index.html", window.location.origin).href,
         },
       });
 
