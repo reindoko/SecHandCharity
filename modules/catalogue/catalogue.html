@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catalogue | Second-Hand Charity System</title>
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+  <link rel="stylesheet" href="./catalogue.css">
+</head>
+<body class="catalogue-page">
+  <div class="app-layout">
+    <aside id="sidebar"></aside>
+    <main class="main-content">
+      <header class="catalogue-header">
+        <div>
+          <p class="eyebrow">Second-Hand Charity System</p>
+          <h1>Catalogue</h1>
+          <p class="page-intro">Find a second life for useful things in your community.</p>
+        </div>
+        <div class="cart-placeholder" aria-label="Shopping cart integration pending">
+          <svg class="cart-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 4h2l2.2 11.1a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H6"></path>
+            <circle cx="10" cy="20" r="1"></circle>
+            <circle cx="18" cy="20" r="1"></circle>
+          </svg>
+          <span class="cart-count" aria-label="Cart item count unavailable">—</span>
+          <span class="cart-label">Cart</span>
+        </div>
+      </header>
+
+      <section class="catalogue-search" aria-label="Search donation items">
+        <label class="search-field">
+          <span class="visually-hidden">Search items</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="10.8" cy="10.8" r="6.8"></circle>
+            <path d="m16 16 5 5"></path>
+          </svg>
+          <input
+            id="item-search"
+            type="search"
+            placeholder="Search by item name or description"
+            autocomplete="off"
+          >
+        </label>
+        <label class="location-field">
+          <span class="visually-hidden">Filter by location</span>
+          <select id="location-filter" disabled>
+            <option value="">All locations</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="category-section" aria-labelledby="category-heading">
+        <div class="section-heading">
+          <div>
+            <h2 id="category-heading">Browse by category</h2>
+            <p>Clothes is configured. Other category filters are awaiting verified item types.</p>
+          </div>
+        </div>
+        <div class="category-grid" aria-label="Filter donation items by category">
+          <button
+            id="category-clothes"
+            class="category-card"
+            type="button"
+            data-item-type="Clothing"
+            aria-pressed="false"
+          >
+            <span class="category-mark" aria-hidden="true">C</span>
+            <span>Clothes</span>
+            <span class="category-status">Filter items</span>
+          </button>
+          <div class="category-card" aria-disabled="true">
+            <span class="category-mark" aria-hidden="true">B</span>
+            <span>Books</span>
+            <span class="category-status">Unavailable</span>
+          </div>
+          <div class="category-card" aria-disabled="true">
+            <span class="category-mark" aria-hidden="true">E</span>
+            <span>Electronics</span>
+            <span class="category-status">Unavailable</span>
+          </div>
+          <div class="category-card" aria-disabled="true">
+            <span class="category-mark" aria-hidden="true">+</span>
+            <span>Others</span>
+            <span class="category-status">Unavailable</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="listings-section" aria-labelledby="listings-heading">
+        <div class="section-heading listings-heading">
+          <div>
+            <h2 id="listings-heading">Donation items</h2>
+            <p id="result-count" aria-live="polite"></p>
+          </div>
+        </div>
+        <div id="catalogue-state" class="catalogue-state" role="status" aria-live="polite">
+          Loading listings…
+        </div>
+        <div id="listing-grid" class="listing-grid" aria-busy="true"></div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/assets/js/sidebar.js"></script>
+  <script type="module" src="./catalogue.js"></script>
+</body>
+</html>
