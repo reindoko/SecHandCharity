@@ -204,3 +204,38 @@
 @media (max-width: 800px) {
     .msg-layout { grid-template-columns: 1fr; grid-template-rows: 180px 1fr; }
 }
+
+/* ---------- Image attachments ---------- */
+.chat-image {
+    display: block;
+    max-width: 240px;
+    max-height: 260px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    object-fit: cover;
+    margin-bottom: 3px;
+}
+
+.image-preview {
+    position: relative;
+    align-self: flex-start;
+    margin: 8px 16px 0;
+}
+.image-preview[hidden] { display: none; }
+.image-preview img {
+    height: 80px;
+    border-radius: 10px;
+    border: 2px solid #222;
+    display: block;
+}
+.image-preview button {
+    position: absolute;
+    top: -8px; right: -8px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid #222;
+    background: #fff;
+    font-size: 0.7rem;
+    line-height: 1;
+    cursor: pointer;
+}
