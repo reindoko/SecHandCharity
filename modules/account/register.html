@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register Account</title>
+
+  <!-- Styling -->
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="./auth.css">
+</head>
+<body class="auth-page">
+  <div class="auth-wrapper">
+    <!-- Left placeholder card, switch to photo or something later -->
+    <section class="auth-info-card">
+      <h2>A Second-Hand Charity.</h2>
+      <h3>Placeholder!</h3>
+    </section>
+
+    <!-- Right register card -->
+    <main class="auth-card">
+      <a href="./login.html" class="back-link">
+        <img class="back-arrow-icon" src="/assets/images/icon-back-arrow.png" alt="">
+        <span>Back to sign in</span>
+      </a>
+      <h1>Register An Account</h1>
+
+      <form id="register-form" novalidate>
+        <!-- Email field -->
+        <div class="field-group">
+          <div class="pill-input-wrap">
+            <input
+              id="register-email"
+              class="pill-input"
+              name="email"
+              type="email"
+              placeholder="Email"
+              autocomplete="email"
+              required
+            >
+          </div>
+          <small class="field-error" id="register-email-error"></small>
+        </div>
+
+        <!-- Username field -->
+        <div class="field-group">
+          <div class="pill-input-wrap w-md">
+            <input
+              id="register-username"
+              class="pill-input"
+              name="username"
+              type="text"
+              placeholder="Username"
+              autocomplete="username"
+              required
+            >
+          </div>
+          <small class="field-error" id="register-username-error"></small>
+        </div>
+
+        <!-- Password field -->
+        <div class="field-group">
+          <div class="pill-input-wrap w-md">
+            <input
+              id="register-password"
+              class="pill-input has-icon"
+              name="password"
+              type="password"
+              placeholder="Password"
+              autocomplete="new-password"
+              required
+            >
+            <button
+              type="button"
+              class="eye-toggle"
+              id="toggle-register-password"
+              aria-label="Toggle password visibility"
+            >
+              <img class="eye-icon-hidden" src="/assets/images/icon-eye-hidden.png" alt="Hidden password">
+              <img class="eye-icon-show is-hidden" src="/assets/images/icon-eye-show.png" alt="Show password">
+            </button>
+          </div>
+          <small class="field-error" id="register-password-error"></small>
+        </div>
+
+        <!-- Location dropdown -->
+        <div class="field-group">
+          <div class="pill-input-wrap w-sm location-combobox">
+            <input
+              id="register-location-search"
+              class="pill-input has-icon"
+              type="text"
+              placeholder="Location"
+              autocomplete="off"
+            >
+            <input
+              id="register-location"
+              name="location"
+              type="hidden"
+            >
+            <img class="select-chevron" src="/assets/images/icon-dropdown-arrow.png" alt="">
+            <div id="register-location-menu" class="location-menu is-hidden" role="listbox"></div>
+          </div>
+          <small class="field-error" id="register-location-error"></small>
+        </div>
+
+        <small class="field-error" id="register-form-error"></small>
+
+        <button type="submit" id="register-btn" class="btn-pill">Register</button>
+      </form>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="./auth.js"></script>
+</body>
+</html>
