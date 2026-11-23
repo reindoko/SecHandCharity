@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f7f4">
+  <meta name="description" content="Browse community donations and find useful items to reuse.">
+  <title>Catalogue | SecHandCharity</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+  <link rel="stylesheet" href="/modules/catalogue/catalogue.css">
+</head>
+<body>
+  <div class="app-layout catalogue-app-layout">
+    <aside id="sidebar" aria-label="Primary sidebar"></aside>
+
+    <main class="main-content catalogue-main-content" id="catalogue-page">
+      <section class="search-panel" aria-label="Search donation items">
+        <form class="search-form" id="catalogue-search-form" role="search">
+          <label class="sr-only" for="catalogue-search-input">Search donation items</label>
+          <span class="search-icon" aria-hidden="true"></span>
+          <input
+            id="catalogue-search-input"
+            name="search"
+            type="search"
+            placeholder="Search donated items"
+            autocomplete="off"
+          >
+          <label class="sr-only" for="catalogue-location-filter">Filter by location</label>
+          <div class="catalogue-location-combobox location-combobox">
+            <input
+              id="catalogue-location-filter"
+              name="location"
+              type="text"
+              placeholder="Enter location..."
+              autocomplete="off"
+            >
+            <img class="catalogue-location-chevron" src="/assets/images/icon-dropdown-arrow.png" alt="">
+            <div
+              id="catalogue-location-menu"
+              class="location-menu is-hidden"
+              role="listbox"
+              aria-label="Location suggestions"
+            ></div>
+          </div>
+          <button class="search-button" type="submit">Search</button>
+        </form>
+
+        <a
+          class="cart-link"
+          href="/modules/cart/renamethis.html"
+          aria-label="Open shopping cart"
+          title="Shopping cart"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 9h14l-1.2 11H6.2L5 9Z"></path>
+            <path d="m9 9 3-5 3 5M9 12v4m6-4v4"></path>
+          </svg>
+        </a>
+      </section>
+
+      <section class="category-section" id="category-section" aria-labelledby="category-heading">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">FIND SOMETHING TO REUSE</p>
+            <h1 id="category-heading">Search by Category</h1>
+          </div>
+          <p class="section-description">Choose a category to explore community donations.</p>
+        </div>
+
+        <div class="category-grid" id="category-grid">
+          <button class="category-card category-clothes" type="button" data-category="clothes" aria-pressed="false">
+            <span class="category-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <path d="M19 11a5 5 0 0 0 10 0M18 10l-8 5-5 8 7 4 4-5v17h18V22l4 5 7-4-5-8-8-5"></path>
+              </svg>
+            </span>
+            <span class="category-name">Clothes</span>
+            <span class="category-count" data-count-for="clothes">0 items</span>
+          </button>
+
+          <button class="category-card category-books" type="button" data-category="books" aria-pressed="false">
+            <span class="category-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <path d="M7 10h13a5 5 0 0 1 5 5v25a5 5 0 0 0-5-5H7V10Zm34 0H28a5 5 0 0 0-3 1v29a5 5 0 0 1 5-5h11V10Z"></path>
+                <path d="M12 17h8m-8 6h8m10-6h6m-6 6h6"></path>
+              </svg>
+            </span>
+            <span class="category-name">Books</span>
+            <span class="category-count" data-count-for="books">0 items</span>
+          </button>
+
+          <button class="category-card category-electronics" type="button" data-category="electronics" aria-pressed="false">
+            <span class="category-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <rect x="13" y="5" width="22" height="38" rx="4"></rect>
+                <path d="M20 10h8m-7 27h6"></path>
+              </svg>
+            </span>
+            <span class="category-name">Electronics</span>
+            <span class="category-count" data-count-for="electronics">0 items</span>
+          </button>
+
+          <button class="category-card category-others" type="button" data-category="others" aria-pressed="false">
+            <span class="category-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <circle cx="10" cy="24" r="3"></circle>
+                <circle cx="24" cy="24" r="3"></circle>
+                <circle cx="38" cy="24" r="3"></circle>
+                <path d="M24 5a19 19 0 1 0 0 38 19 19 0 0 0 0-38Z"></path>
+              </svg>
+            </span>
+            <span class="category-name">Others</span>
+            <span class="category-count" data-count-for="others">0 items</span>
+          </button>
+        </div>
+
+        <div class="others-category-view" id="others-category-view" hidden aria-labelledby="others-category-heading">
+          <button class="back-to-categories" id="back-to-categories" type="button">Back to categories</button>
+          <h2 class="others-subcategory-heading" id="others-category-heading">Others</h2>
+          <div class="category-grid others-subcategory-grid" id="others-subcategory-grid">
+            <button class="category-card" type="button" data-subcategory="furniture" aria-pressed="false">
+              <span class="category-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <path d="M8 25v-7a4 4 0 0 1 4-4h24a4 4 0 0 1 4 4v7"></path>
+                  <path d="M6 25h36v12H6zM10 37v5m28-5v5M12 25v-5h10a4 4 0 0 1 4 4v1m0 0v-1a4 4 0 0 1 4-4h6v5"></path>
+                </svg>
+              </span>
+              <span class="category-name">Furniture</span>
+              <span class="category-count" data-count-for="furniture">0 items</span>
+            </button>
+
+            <button class="category-card" type="button" data-subcategory="home-living" aria-pressed="false">
+              <span class="category-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <path d="m5 22 19-16 19 16"></path>
+                  <path d="M10 20v22h28V20M19 42V28h10v14"></path>
+                </svg>
+              </span>
+              <span class="category-name">Home &amp; Living</span>
+              <span class="category-count" data-count-for="home-living">0 items</span>
+            </button>
+
+            <button class="category-card" type="button" data-subcategory="toys-games" aria-pressed="false">
+              <span class="category-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <circle cx="24" cy="24" r="18"></circle>
+                  <path d="m24 6 5 10-5 8-10 2-8-7m36 2-13 3-5 8 4 10M14 26l-2 12"></path>
+                </svg>
+              </span>
+              <span class="category-name">Toys &amp; Games</span>
+              <span class="category-count" data-count-for="toys-games">0 items</span>
+            </button>
+
+            <button class="category-card" type="button" data-subcategory="baby-kids" aria-pressed="false">
+              <span class="category-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <circle cx="17" cy="12" r="5"></circle>
+                  <path d="M7 41a10 10 0 0 1 20 0m-16-9 4-7h10l4 7m3-16h7v19h-7z"></path>
+                  <circle cx="33" cy="39" r="3"></circle>
+                </svg>
+              </span>
+              <span class="category-name">Baby &amp; Kids</span>
+              <span class="category-count" data-count-for="baby-kids">0 items</span>
+            </button>
+
+            <button class="category-card" type="button" data-subcategory="sports-outdoor" aria-pressed="false">
+              <span class="category-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <circle cx="24" cy="24" r="18"></circle>
+                  <path d="m24 6 5 12-5 6-10-2-8 7m36-7-13-4-5 6 4 12-7 6"></path>
+                </svg>
+              </span>
+              <span class="category-name">Sports &amp; Outdoor</span>
+              <span class="category-count" data-count-for="sports-outdoor">0 items</span>
+            </button>
+
+            <button class="category-card" type="button" data-subcategory="shoes-accessories" aria-pressed="false">
+              <span class="category-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <path d="M6 31c7 0 11-4 14-13l7 7c4 4 8 5 15 6v8H6v-8Z"></path>
+                  <path d="M20 20v7m5-4v5m5-2v5"></path>
+                </svg>
+              </span>
+              <span class="category-name">Shoes &amp; Accessories</span>
+              <span class="category-count" data-count-for="shoes-accessories">0 items</span>
+            </button>
+
+            <button class="category-card" type="button" data-subcategory="beauty-personal-care" aria-pressed="false">
+              <span class="category-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <path d="M17 14h14l-2 28H19l-2-28Zm4 0V8h6v6m-5-6V4h4v4"></path>
+                  <path d="M20 24h8"></path>
+                </svg>
+              </span>
+              <span class="category-name">Beauty &amp; Personal Care</span>
+              <span class="category-count" data-count-for="beauty-personal-care">0 items</span>
+            </button>
+
+            <button class="category-card" type="button" data-subcategory="pet-supplies" aria-pressed="false">
+              <span class="category-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <path d="M24 25c-5-6-12-3-12 3 0 5 5 9 12 13 7-4 12-8 12-13 0-6-7-9-12-3Z"></path>
+                  <ellipse cx="11" cy="17" rx="3" ry="4"></ellipse>
+                  <ellipse cx="20" cy="12" rx="3" ry="4"></ellipse>
+                  <ellipse cx="29" cy="12" rx="3" ry="4"></ellipse>
+                  <ellipse cx="37" cy="17" rx="3" ry="4"></ellipse>
+                </svg>
+              </span>
+              <span class="category-name">Pet Supplies</span>
+              <span class="category-count" data-count-for="pet-supplies">0 items</span>
+            </button>
+
+            <button class="category-card" type="button" data-subcategory="automotive-accessories" aria-pressed="false">
+              <span class="category-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <path d="m8 27 3-10a4 4 0 0 1 4-3h18a4 4 0 0 1 4 3l3 10v12h-5v-5H13v5H8V27Z"></path>
+                  <path d="M11 27h26m-20-13 2 9h10l2-9"></path>
+                  <circle cx="15" cy="30" r="2"></circle>
+                  <circle cx="33" cy="30" r="2"></circle>
+                </svg>
+              </span>
+              <span class="category-name">Automotive Accessories</span>
+              <span class="category-count" data-count-for="automotive-accessories">0 items</span>
+            </button>
+
+            <button class="category-card" type="button" data-subcategory="musical-instruments" aria-pressed="false">
+              <span class="category-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <path d="M29 33V8l12-3v25"></path>
+                  <ellipse cx="23" cy="35" rx="6" ry="4"></ellipse>
+                  <ellipse cx="35" cy="30" rx="6" ry="4"></ellipse>
+                </svg>
+              </span>
+              <span class="category-name">Musical Instruments</span>
+              <span class="category-count" data-count-for="musical-instruments">0 items</span>
+            </button>
+
+            <button class="category-card" type="button" data-subcategory="miscellaneous" aria-pressed="false">
+              <span class="category-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <circle cx="10" cy="24" r="3"></circle>
+                  <circle cx="24" cy="24" r="3"></circle>
+                  <circle cx="38" cy="24" r="3"></circle>
+                </svg>
+              </span>
+              <span class="category-name">Miscellaneous</span>
+              <span class="category-count" data-count-for="miscellaneous">0 items</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="items-section" aria-labelledby="items-heading">
+        <div class="items-heading-row">
+          <div>
+            <p class="section-kicker">SHARED WITH CARE</p>
+            <h2 id="items-heading">Available Donation Items</h2>
+          </div>
+          <p class="items-result-count" id="items-result-count" role="status" aria-live="polite">
+            Loading donations...
+          </p>
+        </div>
+
+        <div class="catalogue-state state-loading" id="loading-state" role="status">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <p>Loading available donations...</p>
+        </div>
+
+        <div class="catalogue-state state-empty" id="empty-state" role="status" hidden>
+          <span class="empty-illustration" aria-hidden="true">
+            <span class="empty-sun"></span>
+            <span class="empty-box"></span>
+            <span class="empty-leaf"></span>
+          </span>
+          <h3 id="empty-title">No donations to show yet</h3>
+          <p id="empty-message">No eligible donation items are available.</p>
+        </div>
+
+        <div class="catalogue-state state-error" id="error-state" role="alert" hidden>
+          <span class="error-mark" aria-hidden="true">!</span>
+          <h3>Catalogue data could not be loaded</h3>
+          <p id="error-message">The Supabase request failed.</p>
+          <button class="retry-button" id="retry-button" type="button">Try again</button>
+        </div>
+
+        <div class="donation-grid" id="donation-grid" aria-live="polite" aria-busy="false"></div>
+      </section>
+
+      <footer class="catalogue-footer">
+        <p>Every reused item is one less thing going to waste.</p>
+      </footer>
+    </main>
+  </div>
+
+  <script type="module" src="/assets/js/sidebar.js"></script>
+  <script type="module" src="/assets/js/location.js"></script>
+  <script type="module" src="/modules/catalogue/catalogue.js"></script>
+</body>
+</html>
