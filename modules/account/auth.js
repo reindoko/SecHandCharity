@@ -92,7 +92,10 @@ export async function ensureUserProfile(user, fallbackUsername = "", fallbackLoc
 }
 
 async function redirectIfAuthenticated() {
-  if (document.getElementById("reset-password-form")) return;
+  const isAuthPage =
+    Boolean(document.getElementById("login-form")) ||
+    Boolean(document.getElementById("register-form"));
+  if (!isAuthPage) return;
 
   const { data, error } = await supabaseClient.auth.getSession();
   if (error) {
