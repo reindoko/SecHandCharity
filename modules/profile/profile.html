@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View a community member's public profile, reviews, and recent donations.">
+  <title>Public Profile | Second Hand Charity</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+  <link rel="stylesheet" href="./profile.css">
+</head>
+<body>
+  <div class="profile-page">
+    <div id="page-status" class="profile-state" role="status" aria-live="polite">
+      Loading profile...
+    </div>
+
+    <div id="profile-content" hidden>
+      <header class="profile-hero">
+        <img id="profile-avatar" class="profile-avatar" src="/assets/images/icon-account.png" alt="">
+        <div class="profile-identity">
+          <p class="eyebrow">Community member</p>
+          <h1 id="profile-name">Public Profile</h1>
+          <p id="profile-location" class="profile-location"></p>
+        </div>
+        <a id="message-link" class="profile-message-button" href="#" hidden>Message</a>
+      </header>
+
+      <section class="profile-stats" aria-label="Profile statistics">
+        <article class="profile-stat">
+          <span class="profile-stat-label">Average rating</span>
+          <strong id="profile-rating">—</strong>
+          <span id="profile-rating-stars" class="profile-stars" aria-label="Rating unavailable">☆☆☆☆☆</span>
+        </article>
+        <article class="profile-stat">
+          <span class="profile-stat-label">Reviews</span>
+          <strong id="profile-review-count">—</strong>
+        </article>
+        <article class="profile-stat">
+          <span class="profile-stat-label">Items Donated</span>
+          <strong id="profile-donated" title="Donation completion is not reliably recorded in the existing database.">Not tracked</strong>
+        </article>
+        <article class="profile-stat">
+          <span class="profile-stat-label">Items Posted</span>
+          <strong id="profile-posted">Loading...</strong>
+        </article>
+        <article class="profile-stat">
+          <span class="profile-stat-label">Account age</span>
+          <strong id="profile-age">—</strong>
+        </article>
+      </section>
+
+      <div class="profile-sections">
+        <section class="profile-section activity-section" aria-labelledby="activity-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Community activity</p>
+              <h2 id="activity-heading">Recent Donations</h2>
+            </div>
+            <span id="activity-count" class="section-count" aria-live="polite"></span>
+          </div>
+          <p id="activity-error" class="inline-error" role="alert" hidden></p>
+          <div id="activity-empty" class="section-empty" hidden>
+            No published donations are publicly available to show.
+          </div>
+          <div id="activity-list" class="activity-grid"></div>
+          <button id="activity-more" class="secondary-button" type="button" hidden>View More</button>
+        </section>
+
+        <section class="profile-section reviews-section" aria-labelledby="reviews-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Community feedback</p>
+              <h2 id="reviews-heading">Reviews</h2>
+            </div>
+          </div>
+          <p id="reviews-error" class="inline-error" role="alert" hidden></p>
+          <div id="review-auth-prompt" class="section-empty" hidden></div>
+          <div id="review-list" class="review-list" aria-live="polite"></div>
+
+          <form id="review-form" class="review-form" hidden>
+            <h3 id="review-form-heading">Write a review</h3>
+            <label for="review-rating">Your rating</label>
+            <select id="review-rating" name="star_rating" required>
+              <option value="5">5 stars</option>
+              <option value="4">4 stars</option>
+              <option value="3">3 stars</option>
+              <option value="2">2 stars</option>
+              <option value="1">1 star</option>
+            </select>
+            <label for="review-comment">Your review</label>
+            <textarea id="review-comment" name="comment" rows="4" required></textarea>
+            <div class="review-form-actions">
+              <button id="review-submit" class="primary-button" type="submit">Post review</button>
+              <button id="review-cancel" class="secondary-button" type="button" hidden>Cancel changes</button>
+            </div>
+            <p id="review-form-status" class="form-status" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/assets/js/sidebar.js"></script>
+  <script type="module" src="/assets/js/script.js"></script>
+  <script type="module" src="./profile.js"></script>
+</body>
+</html>
