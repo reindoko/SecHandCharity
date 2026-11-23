@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecHandCharity</title>
+
+  <!-- Styling -->
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+  <link rel="stylesheet" href="/modules/messaging/msg.css">
+</head>
+<body>
+  <!-- Remove this whole <div> if you don't need the sidebar on this page -->
+  <div class="app-layout">
+    <aside id="sidebar"></aside>
+    <main class="main-content">
+      <!-- Your page content goes here -->
+      <header class="msg-header"><h1>Messages</h1></header>
+
+            <section class="msg-layout">
+                <!-- Left: conversation list -->
+                <aside class="chat-list-panel">
+                    <input type="search" id="chatSearch" class="chat-search" placeholder="Search..." autocomplete="off">
+                    <ul id="chatList" class="chat-list"></ul>
+                </aside>
+
+                <!-- Right: active chat -->
+                <section class="chat-panel">
+                    <div id="chatEmpty" class="chat-empty">Select a chat to start messaging</div>
+
+                    <div id="chatView" class="chat-view" hidden>
+                        <header class="chat-head">
+                            <span class="avatar" id="chatAvatar"></span>
+                            <span id="chatName"></span>
+                        </header>
+
+                        <div id="messageArea" class="message-area"></div>
+
+                        <div id="editBar" class="edit-bar" hidden>
+                            <span>Editing message</span>
+                            <button type="button" id="cancelEdit">Cancel</button>
+                        </div>
+
+                        <form id="messageForm" class="message-form" autocomplete="off">
+                            <button type="button" class="icon-btn" title="Attach (coming soon)" disabled>📎</button>
+                            <input type="text" id="messageInput" placeholder="Enter your message..." maxlength="2000">
+                            <button type="submit" class="icon-btn send-btn" title="Send">➤</button>
+                        </form>
+                    </div>
+                </section>
+            </section>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="/assets/js/sidebar.js"></script>
+  <script type="module" src="/assets/js/script.js"></script>
+ <script type="module" src="/modules/messaging/msg.js"></script>
+</body>
+</html>
