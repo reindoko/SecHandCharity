@@ -25,7 +25,7 @@ const SIDEBAR_TABS = [
   {
     key: "messages",
     label: "Messages",
-    href: "/modules/messaging/messages.html",
+    href: "/modules/messaging/msg.html",
     icon: `${IMAGE_PATH}/icon-message.png`,
   },
   {
