@@ -38,19 +38,36 @@
             autocomplete="off"
           >
           <label class="sr-only" for="catalogue-location-filter">Filter by location</label>
-          <select id="catalogue-location-filter" name="location">
-            <option value="">All locations</option>
-          </select>
+          <div class="catalogue-location-combobox location-combobox">
+            <input
+              id="catalogue-location-filter"
+              name="location"
+              type="text"
+              placeholder="Enter location..."
+              autocomplete="off"
+            >
+            <img class="catalogue-location-chevron" src="/assets/images/icon-dropdown-arrow.png" alt="">
+            <div
+              id="catalogue-location-menu"
+              class="location-menu is-hidden"
+              role="listbox"
+              aria-label="Location suggestions"
+            ></div>
+          </div>
           <button class="search-button" type="submit">Search</button>
         </form>
 
-        <div class="basket-indicator" aria-label="Available donation items">
+        <a
+          class="cart-link"
+          href="/modules/cart/renamethis.html"
+          aria-label="Open shopping cart"
+          title="Shopping cart"
+        >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5 9h14l-1.2 11H6.2L5 9Z"></path>
             <path d="m9 9 3-5 3 5M9 12v4m6-4v4"></path>
           </svg>
-          <span class="basket-count" id="basket-count">0</span>
-        </div>
+        </a>
       </section>
 
       <section class="category-section" aria-labelledby="category-heading">
@@ -84,7 +101,7 @@
             <span class="category-count" data-count-for="books">0 items</span>
           </button>
 
-          <button class="category-card category-electronics" type="button" data-category="electronics" aria-pressed="false">
+          <button class="category-card category-electronics" type="button" data-category="electronics" aria-pressed="false" disabled title="Unavailable until the database category value is verified">
             <span class="category-icon" aria-hidden="true">
               <svg viewBox="0 0 48 48">
                 <rect x="13" y="5" width="22" height="38" rx="4"></rect>
@@ -92,10 +109,10 @@
               </svg>
             </span>
             <span class="category-name">Electronics</span>
-            <span class="category-count" data-count-for="electronics">0 items</span>
+            <span class="category-count" data-count-for="electronics">Unavailable</span>
           </button>
 
-          <button class="category-card category-others" type="button" data-category="others" aria-pressed="false">
+          <button class="category-card category-others" type="button" data-category="others" aria-pressed="false" disabled title="Unavailable until the database category value is verified">
             <span class="category-icon" aria-hidden="true">
               <svg viewBox="0 0 48 48">
                 <circle cx="10" cy="24" r="3"></circle>
@@ -105,7 +122,7 @@
               </svg>
             </span>
             <span class="category-name">Others</span>
-            <span class="category-count" data-count-for="others">0 items</span>
+            <span class="category-count" data-count-for="others">Unavailable</span>
           </button>
         </div>
       </section>
@@ -133,16 +150,14 @@
             <span class="empty-leaf"></span>
           </span>
           <h3 id="empty-title">No donations to show yet</h3>
-          <p id="empty-message">No eligible donation items are available in the local data source.</p>
+          <p id="empty-message">No eligible donation items are available.</p>
         </div>
 
         <div class="catalogue-state state-error" id="error-state" role="alert" hidden>
           <span class="error-mark" aria-hidden="true">!</span>
           <h3>Catalogue data could not be loaded</h3>
-          <p id="error-message">Check that the local JSON source is served alongside the project.</p>
+          <p id="error-message">The Supabase request failed.</p>
           <button class="retry-button" id="retry-button" type="button">Try again</button>
-          <button class="file-button" id="choose-data-file" type="button">Choose local JSON file</button>
-          <input class="sr-only" id="local-data-file" type="file" accept=".json,application/json">
         </div>
 
         <div class="donation-grid" id="donation-grid" aria-live="polite" aria-busy="false"></div>
@@ -155,6 +170,7 @@
   </div>
 
   <script type="module" src="/assets/js/sidebar.js"></script>
+  <script type="module" src="/assets/js/location.js"></script>
   <script type="module" src="/modules/catalogue/catalogue.js"></script>
 </body>
 </html>
