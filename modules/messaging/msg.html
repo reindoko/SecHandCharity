@@ -41,12 +41,21 @@
                             <span>Editing message</span>
                             <button type="button" id="cancelEdit">Cancel</button>
                         </div>
+                        <!-- 新增:图片预览区,放在 form 前面 -->
+                        <div id="imagePreview" class="image-preview" hidden>
+                            <img id="previewImg" alt="">
+                            <button type="button" id="removeImage" title="Remove image">✕</button>
+                        </div>
 
                         <form id="messageForm" class="message-form" autocomplete="off">
-                            <button type="button" class="icon-btn" title="Attach (coming soon)" disabled>📎</button>
+                            <!-- 修改:换成可用的按钮,并加上隐藏的文件选择框 -->
+                            <button type="button" class="icon-btn" id="attachBtn" title="Attach image">📎</button>
+                            <input type="file" id="imageInput" accept="image/*" hidden>
+
                             <input type="text" id="messageInput" placeholder="Enter your message..." maxlength="2000">
                             <button type="submit" class="icon-btn send-btn" title="Send">➤</button>
                         </form>
+                        
                     </div>
                 </section>
             </section>
