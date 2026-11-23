@@ -7,19 +7,58 @@ const ITEM_FIELDS =
 const CATEGORY_ITEM_TYPES = {
   clothes: "Clothing",
   books: "Books",
+  electronics: "Electronics",
+  furniture: "Furniture",
+  "home-living": "Home & Living",
+  "toys-games": "Toys & Games",
+  "baby-kids": "Baby & Kids",
+  "sports-outdoor": "Sports & Outdoor",
+  "shoes-accessories": "Shoes & Accessories",
+  "beauty-personal-care": "Beauty & Personal Care",
+  "pet-supplies": "Pet Supplies",
+  "automotive-accessories": "Automotive Accessories",
+  "musical-instruments": "Musical Instruments",
+  miscellaneous: "Miscellaneous",
 };
+const OTHER_CATEGORY_KEYS = [
+  "furniture",
+  "home-living",
+  "toys-games",
+  "baby-kids",
+  "sports-outdoor",
+  "shoes-accessories",
+  "beauty-personal-care",
+  "pet-supplies",
+  "automotive-accessories",
+  "musical-instruments",
+  "miscellaneous",
+];
 const CATEGORY_LABELS = {
   clothes: "Clothes",
   books: "Books",
   electronics: "Electronics",
-  others: "Others",
+  furniture: "Furniture",
+  "home-living": "Home & Living",
+  "toys-games": "Toys & Games",
+  "baby-kids": "Baby & Kids",
+  "sports-outdoor": "Sports & Outdoor",
+  "shoes-accessories": "Shoes & Accessories",
+  "beauty-personal-care": "Beauty & Personal Care",
+  "pet-supplies": "Pet Supplies",
+  "automotive-accessories": "Automotive Accessories",
+  "musical-instruments": "Musical Instruments",
+  miscellaneous: "Miscellaneous",
 };
 
 const searchForm = document.querySelector("#catalogue-search-form");
 const searchInput = document.querySelector("#catalogue-search-input");
 const locationFilter = document.querySelector("#catalogue-location-filter");
 const locationMenu = document.querySelector("#catalogue-location-menu");
+const categorySection = document.querySelector("#category-section");
 const categoryGrid = document.querySelector("#category-grid");
+const othersCategoryView = document.querySelector("#others-category-view");
+const othersSubcategoryGrid = document.querySelector("#others-subcategory-grid");
+const backToCategories = document.querySelector("#back-to-categories");
 const itemsHeading = document.querySelector("#items-heading");
 const donationGrid = document.querySelector("#donation-grid");
 const loadingState = document.querySelector("#loading-state");
@@ -33,6 +72,7 @@ const resultsCount = document.querySelector("#items-result-count");
 
 let donationItems = [];
 let selectedCategory = "";
+let showingOthersCategories = false;
 let catalogueLoaded = false;
 
 function setCatalogueState(state) {
@@ -131,8 +171,10 @@ function createLocationIcon() {
 }
 
 function createDonationCard(item) {
-  const card = document.createElement("article");
+  const card = document.createElement("a");
   card.className = "donation-card";
+  card.href = `/modules/item/item-details.html?${new URLSearchParams({ id: String(item.id) })}`;
+  card.setAttribute("aria-label", `View donation: ${item.title || "Untitled donation"}`);
 
   const photoUrl = getPhotoUrl(item.photo_urls);
   if (photoUrl) {
@@ -171,9 +213,38 @@ function createDonationCard(item) {
 function updateCategoryCounts(items) {
   for (const [category, itemType] of Object.entries(CATEGORY_ITEM_TYPES)) {
     const count = items.filter((item) => item.item_type === itemType).length;
-    const countElement = categoryGrid.querySelector(`[data-count-for="${category}"]`);
+    const countElement = categorySection.querySelector(`[data-count-for="${category}"]`);
     countElement.textContent = `${count} ${count === 1 ? "item" : "items"}`;
   }
+
+  const otherItemTypes = OTHER_CATEGORY_KEYS
+    .map((category) => CATEGORY_ITEM_TYPES[category])
+    .filter(Boolean);
+  const othersCount = items.filter((item) =>
+    otherItemTypes.includes(item.item_type)
+  ).length;
+  const othersCountElement = categorySection.querySelector('[data-count-for="others"]');
+  othersCountElement.textContent = `${othersCount} ${othersCount === 1 ? "item" : "items"}`;
+}
+
+function updateCategoryNavigation() {
+  categoryGrid.hidden = showingOthersCategories;
+  othersCategoryView.hidden = !showingOthersCategories;
+
+  categoryGrid.querySelectorAll("[data-category]").forEach((button) => {
+    const category = button.dataset.category;
+    const isSelected = category === "others"
+      ? showingOthersCategories
+      : selectedCategory === category;
+    button.setAttribute("aria-pressed", String(isSelected));
+  });
+
+  othersSubcategoryGrid.querySelectorAll("[data-subcategory]").forEach((button) => {
+    button.setAttribute(
+      "aria-pressed",
+      String(button.dataset.subcategory === selectedCategory)
+    );
+  });
 }
 
 function getFilteredItems() {
@@ -204,12 +275,21 @@ function renderItems() {
   resultsCount.textContent = `${items.length} ${items.length === 1 ? "item" : "items"}`;
 
   if (items.length === 0) {
-    emptyTitle.textContent = donationItems.length === 0
-      ? "No donations to show yet"
-      : "No items match these filters";
-    emptyMessage.textContent = donationItems.length === 0
-      ? "No eligible published donation items are available."
-      : "Try another search or category to see more community donations.";
+    const categoryHasItems = !selectedCategory ||
+      donationItems.some((item) => matchesCategory(item, selectedCategory));
+
+    if (donationItems.length === 0) {
+      emptyTitle.textContent = "No donations to show yet";
+      emptyMessage.textContent = "No eligible published donation items are available.";
+    } else if (selectedCategory && !categoryHasItems) {
+      emptyTitle.textContent = `No ${CATEGORY_LABELS[selectedCategory]} donations available`;
+      emptyMessage.textContent =
+        `There are currently no available ${CATEGORY_LABELS[selectedCategory].toLocaleLowerCase()} donations.`;
+    } else {
+      emptyTitle.textContent = "No items match these filters";
+      emptyMessage.textContent = "Try another search or category to see more community donations.";
+    }
+
     setCatalogueState("empty");
     return;
   }
@@ -267,16 +347,41 @@ categoryGrid.addEventListener("click", (event) => {
     return;
   }
 
-  selectedCategory = selectedCategory === button.dataset.category ? "" : button.dataset.category;
-  categoryGrid.querySelectorAll("[data-category]").forEach((categoryButton) => {
-    categoryButton.setAttribute(
-      "aria-pressed",
-      String(categoryButton.dataset.category === selectedCategory)
-    );
-  });
+  if (button.dataset.category === "others") {
+    selectedCategory = "";
+    showingOthersCategories = true;
+  } else {
+    selectedCategory = selectedCategory === button.dataset.category
+      ? ""
+      : button.dataset.category;
+    showingOthersCategories = false;
+  }
+
+  updateCategoryNavigation();
+  renderItems();
+});
+
+othersSubcategoryGrid.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-subcategory]");
+  if (!button) {
+    return;
+  }
+
+  selectedCategory = selectedCategory === button.dataset.subcategory
+    ? ""
+    : button.dataset.subcategory;
+  updateCategoryNavigation();
+  renderItems();
+});
+
+backToCategories.addEventListener("click", () => {
+  showingOthersCategories = false;
+  selectedCategory = "";
+  updateCategoryNavigation();
   renderItems();
 });
 
 retryButton.addEventListener("click", loadCatalogue);
 
+updateCategoryNavigation();
 loadCatalogue();
