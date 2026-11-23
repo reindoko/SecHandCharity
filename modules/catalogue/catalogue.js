@@ -1,179 +1,376 @@
-import { supabaseClient } from "/assets/js/supabase-client.js";
+const DATA_URL = new URL(
+  "../../../SecondHandCharity-Catalogue/data/donations.json",
+  window.location.href
+);
+const ELIGIBLE_STATUS = "available";
+const ITEM_FIELDS = [
+  "title",
+  "description",
+  "location",
+  "item_type",
+  "condition_type",
+  "photo_urls",
+];
+const CATEGORY_VALUES = {
+  clothes: ["clothing", "clothes", "cloth"],
+  books: ["book", "books"],
+  electronics: ["electronic", "electronics"],
+};
 
-const PAGE_SIZE = 500;
-const ITEM_FIELDS = "id,title,description,location,item_type,condition_type,status,created_at";
+const searchForm = document.querySelector("#catalogue-search-form");
+const searchInput = document.querySelector("#catalogue-search-input");
+const locationFilter = document.querySelector("#catalogue-location-filter");
+const categoryGrid = document.querySelector("#category-grid");
+const donationGrid = document.querySelector("#donation-grid");
+const loadingState = document.querySelector("#loading-state");
+const emptyState = document.querySelector("#empty-state");
+const errorState = document.querySelector("#error-state");
+const emptyTitle = document.querySelector("#empty-title");
+const emptyMessage = document.querySelector("#empty-message");
+const errorMessage = document.querySelector("#error-message");
+const retryButton = document.querySelector("#retry-button");
+const chooseDataFileButton = document.querySelector("#choose-data-file");
+const localDataFileInput = document.querySelector("#local-data-file");
+const resultsCount = document.querySelector("#items-result-count");
+const basketCount = document.querySelector("#basket-count");
 
-const searchInput = document.getElementById("item-search");
-const locationFilter = document.getElementById("location-filter");
-const clothesCategory = document.getElementById("category-clothes");
-const catalogueState = document.getElementById("catalogue-state");
-const listingGrid = document.getElementById("listing-grid");
-const resultCount = document.getElementById("result-count");
+const projectRoot = new URL("/", window.location.origin);
+const localPhotoRoot = new URL("assets/donations/", projectRoot);
 
-let catalogueItems = [];
+let donationItems = [];
 let selectedCategory = "";
+let catalogueLoaded = false;
 
-function setState(message, isError = false) {
-  catalogueState.textContent = message;
-  catalogueState.classList.toggle("is-error", isError);
+function setCatalogueState(state) {
+  loadingState.hidden = state !== "loading";
+  emptyState.hidden = state !== "empty";
+  errorState.hidden = state !== "error";
+  donationGrid.hidden = state === "loading" || state === "error" || state === "empty";
+  donationGrid.setAttribute("aria-busy", String(state === "loading"));
 }
 
-function createTag(label, value, className = "") {
-  const tag = document.createElement("span");
-  tag.className = `listing-tag${className ? ` ${className}` : ""}`;
-  tag.textContent = `${label}: ${value || "Not provided"}`;
-  return tag;
+function normalizeCategory(value) {
+  return typeof value === "string" ? value.trim().toLocaleLowerCase() : "";
 }
 
-function createListingCard(item) {
-  const card = document.createElement("a");
-  card.className = "listing-card";
-  card.href = `/modules/item/item-menu.html?item_id=${encodeURIComponent(item.id)}`;
-  card.setAttribute(
-    "aria-label",
-    `Open item ${item.title || "without a title"} in the existing Item module`
-  );
+function isKnownCategory(value) {
+  const normalizedValue = normalizeCategory(value);
+  return Object.values(CATEGORY_VALUES).some((values) => values.includes(normalizedValue));
+}
 
-  const photoPlaceholder = document.createElement("div");
-  photoPlaceholder.className = "listing-photo-placeholder";
-  photoPlaceholder.textContent = "Photo format not verified";
-  photoPlaceholder.setAttribute("aria-hidden", "true");
+function matchesCategory(item, category) {
+  if (!category) {
+    return true;
+  }
 
-  const content = document.createElement("div");
-  content.className = "listing-card-content";
+  const value = normalizeCategory(item.item_type);
+  if (category === "others") {
+    return !isKnownCategory(value);
+  }
+
+  return CATEGORY_VALUES[category].includes(value);
+}
+
+function validateDonationRecord(record, index, seenIds) {
+  const recordNumber = index + 1;
+  if (!record || typeof record !== "object" || Array.isArray(record)) {
+    throw new Error(`Donation record ${recordNumber} must be a JSON object.`);
+  }
+
+  const validId =
+    (typeof record.id === "string" && record.id.trim() !== "") ||
+    (typeof record.id === "number" && Number.isSafeInteger(record.id));
+  if (!validId) {
+    throw new Error(`Donation record ${recordNumber} must have a valid item id.`);
+  }
+  if (record.status !== null && typeof record.status !== "string") {
+    throw new Error(`Donation record ${recordNumber} must have a string or null status.`);
+  }
+
+  const id = String(record.id);
+  if (seenIds.has(id)) {
+    throw new Error(`Donation record ${recordNumber} has a duplicate id.`);
+  }
+  seenIds.add(id);
+
+  for (const field of ITEM_FIELDS) {
+    if (!(field in record) || (record[field] !== null && typeof record[field] !== "string")) {
+      throw new Error(`Donation record ${recordNumber} must have a string or null ${field} field.`);
+    }
+  }
+
+  return {
+    id,
+    status: record.status,
+    title: record.title,
+    description: record.description,
+    location: record.location,
+    item_type: record.item_type,
+    condition_type: record.condition_type,
+    photo_urls: record.photo_urls,
+  };
+}
+
+function parseLocalDonations(records) {
+  if (!Array.isArray(records)) {
+    throw new Error("The local donation source must contain a JSON array.");
+  }
+
+  const seenIds = new Set();
+  return records
+    .map((record, index) => validateDonationRecord(record, index, seenIds))
+    .filter((record) => record.status === ELIGIBLE_STATUS);
+}
+
+async function loadLocalDonations() {
+  const response = await fetch(DATA_URL, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(
+      `Could not load local JSON data (${response.status}). Ensure the standalone data folder is served at ${DATA_URL.pathname}, or choose the JSON file below.`
+    );
+  }
+
+  return parseLocalDonations(await response.json());
+}
+
+function shuffle(items) {
+  const shuffledItems = [...items];
+  for (let index = shuffledItems.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffledItems[index], shuffledItems[swapIndex]] = [
+      shuffledItems[swapIndex],
+      shuffledItems[index],
+    ];
+  }
+  return shuffledItems;
+}
+
+function getPhotoUrl(photoValue) {
+  if (typeof photoValue !== "string" || !photoValue.trim()) {
+    return null;
+  }
+
+  const trimmedValue = photoValue.trim();
+  let candidates = [trimmedValue];
+  if (trimmedValue.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(trimmedValue);
+      candidates = Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.warn("Could not parse an item's local photo_urls value.", error);
+      return null;
+    }
+  }
+
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string") {
+      continue;
+    }
+
+    try {
+      const url = new URL(candidate.trim(), projectRoot);
+      if (url.origin === window.location.origin && url.pathname.startsWith(localPhotoRoot.pathname)) {
+        return url.href;
+      }
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+function createPhotoPlaceholder() {
+  const placeholder = document.createElement("div");
+  placeholder.className = "photo-placeholder";
+  placeholder.setAttribute("aria-label", "No item photo available");
+  placeholder.innerHTML =
+    '<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="5" width="24" height="22" rx="3"></rect><circle cx="11" cy="12" r="2"></circle><path d="m6 24 7-7 5 5 3-3 5 5"></path></svg>';
+  return placeholder;
+}
+
+function createLocationIcon() {
+  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  icon.setAttribute("viewBox", "0 0 24 24");
+  icon.setAttribute("aria-hidden", "true");
+
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", "M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z");
+  icon.append(path);
+
+  const center = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  center.setAttribute("cx", "12");
+  center.setAttribute("cy", "10");
+  center.setAttribute("r", "2");
+  icon.append(center);
+  return icon;
+}
+
+function createDonationCard(item) {
+  const card = document.createElement("article");
+  card.className = "donation-card";
+
+  const photoUrl = getPhotoUrl(item.photo_urls);
+  if (photoUrl) {
+    const image = document.createElement("img");
+    image.className = "donation-card-image";
+    image.src = photoUrl;
+    image.alt = item.title ? `Photo of ${item.title}` : "Donated item";
+    image.loading = "lazy";
+    image.addEventListener("error", () => image.replaceWith(createPhotoPlaceholder()), { once: true });
+    card.append(image);
+  } else {
+    card.append(createPhotoPlaceholder());
+  }
+
+  const body = document.createElement("div");
+  body.className = "donation-card-body";
 
   const title = document.createElement("h3");
-  title.textContent = item.title || "Untitled item";
-  content.appendChild(title);
+  title.className = "donation-card-title";
+  title.textContent = item.title || "Untitled donation";
+  body.append(title);
 
-  const description = document.createElement("p");
-  description.className = "listing-description";
-  description.textContent = item.description || "No description provided.";
-  content.appendChild(description);
+  const location = document.createElement("p");
+  location.className = "donation-card-location";
+  location.append(createLocationIcon());
+  const locationText = document.createElement("span");
+  locationText.textContent = item.location || "Location not provided";
+  location.append(locationText);
+  body.append(location);
 
-  const metadata = document.createElement("div");
-  metadata.className = "listing-meta";
-  metadata.append(
-    createTag("Type", item.item_type || "Unverified"),
-    createTag("Condition", item.condition_type),
-    createTag("Location", item.location),
-    createTag("Status", item.status || "Unverified", "listing-status")
-  );
-  content.appendChild(metadata);
-
-  card.append(photoPlaceholder, content);
+  card.append(body);
   return card;
 }
 
-function getVisibleItems() {
-  const query = searchInput.value.trim().toLocaleLowerCase();
+function updateLocationOptions(items) {
   const selectedLocation = locationFilter.value;
+  const options = [new Option("All locations", "")];
+  const locations = [...new Set(items.map((item) => item.location).filter(Boolean))]
+    .sort((first, second) => first.localeCompare(second));
 
-  return catalogueItems.filter((item) => {
-    const searchableText = `${item.title || ""} ${item.description || ""}`.toLocaleLowerCase();
-    const matchesQuery = !query || searchableText.includes(query);
-    const matchesLocation = !selectedLocation || item.location?.trim() === selectedLocation;
-    const matchesCategory = !selectedCategory || item.item_type === selectedCategory;
-    return matchesQuery && matchesLocation && matchesCategory;
+  locations.forEach((location) => options.push(new Option(location, location)));
+  locationFilter.replaceChildren(...options);
+  locationFilter.value = locations.includes(selectedLocation) ? selectedLocation : "";
+}
+
+function updateCategoryCounts(items) {
+  for (const category of Object.keys(CATEGORY_VALUES)) {
+    const count = items.filter((item) => matchesCategory(item, category)).length;
+    const countElement = categoryGrid.querySelector(`[data-count-for="${category}"]`);
+    countElement.textContent = `${count} ${count === 1 ? "item" : "items"}`;
+  }
+
+  const otherCount = items.filter((item) => matchesCategory(item, "others")).length;
+  const otherCountElement = categoryGrid.querySelector('[data-count-for="others"]');
+  otherCountElement.textContent = `${otherCount} ${otherCount === 1 ? "item" : "items"}`;
+}
+
+function getFilteredItems() {
+  const keyword = searchInput.value.trim().toLocaleLowerCase();
+  const location = locationFilter.value;
+
+  return donationItems.filter((item) => {
+    const matchesKeyword =
+      !keyword ||
+      `${item.title || ""} ${item.description || ""}`.toLocaleLowerCase().includes(keyword);
+    const matchesLocation = !location || item.location === location;
+    return matchesKeyword && matchesLocation && matchesCategory(item, selectedCategory);
   });
 }
 
 function renderItems() {
-  const visibleItems = getVisibleItems();
-  const fragment = document.createDocumentFragment();
-
-  for (const item of visibleItems) {
-    fragment.appendChild(createListingCard(item));
+  if (!catalogueLoaded) {
+    return;
   }
 
-  listingGrid.replaceChildren(fragment);
-  listingGrid.setAttribute("aria-busy", "false");
-  resultCount.textContent = `${visibleItems.length} ${visibleItems.length === 1 ? "listing" : "listings"}`;
+  const items = getFilteredItems();
+  const cards = document.createDocumentFragment();
+  items.forEach((item) => cards.append(createDonationCard(item)));
+  donationGrid.replaceChildren(cards);
+  resultsCount.textContent = `${items.length} ${items.length === 1 ? "item" : "items"}`;
 
-  if (visibleItems.length === 0) {
-    setState(
-      catalogueItems.length === 0
-        ? "No listings were returned by Supabase."
-        : "No listings match your selected filters."
-    );
-  } else {
-    setState("");
+  if (items.length === 0) {
+    emptyTitle.textContent = donationItems.length === 0
+      ? "No donations to show yet"
+      : "No items match these filters";
+    emptyMessage.textContent = donationItems.length === 0
+      ? "No eligible donation items are available in the local JSON source."
+      : "Try another search or category to see more community donations.";
+    setCatalogueState("empty");
+    return;
   }
+  setCatalogueState("items");
 }
 
-function populateLocations() {
-  const locations = [...new Set(
-    catalogueItems
-      .map((item) => item.location?.trim())
-      .filter(Boolean)
-  )].sort((a, b) => a.localeCompare(b));
-
-  locationFilter.replaceChildren(new Option("All locations", ""));
-  for (const location of locations) {
-    locationFilter.add(new Option(location, location));
-  }
-  locationFilter.disabled = locations.length === 0;
+function displayDonations(items) {
+  donationItems = shuffle(items);
+  updateLocationOptions(donationItems);
+  updateCategoryCounts(donationItems);
+  basketCount.textContent = String(donationItems.length);
+  catalogueLoaded = true;
+  renderItems();
 }
 
-function renderError(error) {
-  console.error("Could not load catalogue items:", error);
-  listingGrid.replaceChildren();
-  listingGrid.setAttribute("aria-busy", "false");
-  resultCount.textContent = "";
-  setState("Listings could not be loaded. Please try again.", true);
-
-  const retryButton = document.createElement("button");
-  retryButton.className = "retry-button";
-  retryButton.type = "button";
-  retryButton.textContent = "Retry";
-  retryButton.addEventListener("click", loadItems, { once: true });
-  catalogueState.appendChild(retryButton);
+function showLoadError(error) {
+  console.error("Failed to load local Catalogue data.", error);
+  catalogueLoaded = false;
+  resultsCount.textContent = "Catalogue unavailable";
+  errorMessage.textContent =
+    error instanceof Error ? error.message : "The local donation data could not be read.";
+  setCatalogueState("error");
 }
 
-async function loadItems() {
-  setState("Loading listings…");
-  listingGrid.replaceChildren();
-  listingGrid.setAttribute("aria-busy", "true");
-  resultCount.textContent = "";
-  searchInput.disabled = true;
-  locationFilter.disabled = true;
-
-  const loadedItems = [];
-  let offset = 0;
+async function loadCatalogue() {
+  catalogueLoaded = false;
+  setCatalogueState("loading");
+  resultsCount.textContent = "Loading donations...";
+  donationGrid.replaceChildren();
 
   try {
-    while (true) {
-      const { data, error } = await supabaseClient
-        .from("items")
-        .select(ITEM_FIELDS)
-        .order("created_at", { ascending: false })
-        .order("id", { ascending: false })
-        .range(offset, offset + PAGE_SIZE - 1);
-
-      if (error) throw error;
-
-      loadedItems.push(...data);
-      if (data.length < PAGE_SIZE) break;
-      offset += PAGE_SIZE;
-    }
-
-    catalogueItems = loadedItems;
-    populateLocations();
-    searchInput.disabled = false;
-    renderItems();
+    displayDonations(await loadLocalDonations());
   } catch (error) {
-    searchInput.disabled = false;
-    renderError(error);
+    showLoadError(error);
   }
 }
 
-searchInput.addEventListener("input", renderItems);
-locationFilter.addEventListener("change", renderItems);
-clothesCategory.addEventListener("click", () => {
-  const isSelected = clothesCategory.getAttribute("aria-pressed") === "true";
-  selectedCategory = isSelected ? "" : clothesCategory.dataset.itemType;
-  clothesCategory.setAttribute("aria-pressed", String(!isSelected));
+async function loadSelectedFile(file) {
+  catalogueLoaded = false;
+  setCatalogueState("loading");
+  resultsCount.textContent = "Reading local donation file...";
+  try {
+    displayDonations(parseLocalDonations(JSON.parse(await file.text())));
+  } catch (error) {
+    showLoadError(error);
+  }
+}
+
+searchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
   renderItems();
 });
 
-loadItems();
+locationFilter.addEventListener("change", renderItems);
+categoryGrid.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-category]");
+  if (button) {
+    selectedCategory = selectedCategory === button.dataset.category ? "" : button.dataset.category;
+    categoryGrid.querySelectorAll("[data-category]").forEach((categoryButton) => {
+      categoryButton.setAttribute(
+        "aria-pressed",
+        String(categoryButton.dataset.category === selectedCategory)
+      );
+    });
+    renderItems();
+  }
+});
+retryButton.addEventListener("click", loadCatalogue);
+chooseDataFileButton.addEventListener("click", () => localDataFileInput.click());
+localDataFileInput.addEventListener("change", () => {
+  const [file] = localDataFileInput.files;
+  if (file) {
+    loadSelectedFile(file);
+  }
+});
+
+basketCount.textContent = "0";
+loadCatalogue();

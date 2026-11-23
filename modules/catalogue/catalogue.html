@@ -3,108 +3,158 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Catalogue | Second-Hand Charity System</title>
-
+  <meta name="theme-color" content="#f5f7f4">
+  <meta name="description" content="Browse community donations and find useful items to reuse.">
+  <title>Catalogue | SecHandCharity</title>
   <link rel="stylesheet" href="/assets/css/style.css">
   <link rel="stylesheet" href="/assets/css/sidebar.css">
-  <link rel="stylesheet" href="./catalogue.css">
+  <link rel="stylesheet" href="/modules/catalogue/catalogue.css">
 </head>
-<body class="catalogue-page">
-  <div class="app-layout">
-    <aside id="sidebar"></aside>
-    <main class="main-content">
+<body>
+  <div class="app-layout catalogue-app-layout">
+    <aside id="sidebar" aria-label="Primary sidebar"></aside>
+
+    <main class="main-content catalogue-main-content" id="catalogue-page">
       <header class="catalogue-header">
-        <div>
-          <p class="eyebrow">Second-Hand Charity System</p>
-          <h1>Catalogue</h1>
-          <p class="page-intro">Find a second life for useful things in your community.</p>
-        </div>
-        <div class="cart-placeholder" aria-label="Shopping cart integration pending">
-          <svg class="cart-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M3 4h2l2.2 11.1a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H6"></path>
-            <circle cx="10" cy="20" r="1"></circle>
-            <circle cx="18" cy="20" r="1"></circle>
-          </svg>
-          <span class="cart-count" aria-label="Cart item count unavailable">—</span>
-          <span class="cart-label">Cart</span>
-        </div>
+        <a class="brand" href="/index.html" aria-label="Second Hand Charity home">
+          <span class="brand-mark" aria-hidden="true">SC</span>
+          <span class="brand-copy">
+            <span class="brand-name">Second Hand Charity</span>
+            <span class="brand-tagline">Reuse. Share. Support.</span>
+          </span>
+        </a>
+        <p class="header-note">Give useful things a second life</p>
       </header>
 
-      <section class="catalogue-search" aria-label="Search donation items">
-        <label class="search-field">
-          <span class="visually-hidden">Search items</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="10.8" cy="10.8" r="6.8"></circle>
-            <path d="m16 16 5 5"></path>
-          </svg>
+      <section class="search-panel" aria-label="Search donation items">
+        <form class="search-form" id="catalogue-search-form" role="search">
+          <label class="sr-only" for="catalogue-search-input">Search donation items</label>
+          <span class="search-icon" aria-hidden="true"></span>
           <input
-            id="item-search"
+            id="catalogue-search-input"
+            name="search"
             type="search"
-            placeholder="Search by item name or description"
+            placeholder="Search donated items"
             autocomplete="off"
           >
-        </label>
-        <label class="location-field">
-          <span class="visually-hidden">Filter by location</span>
-          <select id="location-filter" disabled>
+          <label class="sr-only" for="catalogue-location-filter">Filter by location</label>
+          <select id="catalogue-location-filter" name="location">
             <option value="">All locations</option>
           </select>
-        </label>
+          <button class="search-button" type="submit">Search</button>
+        </form>
+
+        <div class="basket-indicator" aria-label="Available donation items">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 9h14l-1.2 11H6.2L5 9Z"></path>
+            <path d="m9 9 3-5 3 5M9 12v4m6-4v4"></path>
+          </svg>
+          <span class="basket-count" id="basket-count">0</span>
+        </div>
       </section>
 
       <section class="category-section" aria-labelledby="category-heading">
         <div class="section-heading">
           <div>
-            <h2 id="category-heading">Browse by category</h2>
-            <p>Clothes is configured. Other category filters are awaiting verified item types.</p>
+            <p class="section-kicker">FIND SOMETHING TO REUSE</p>
+            <h1 id="category-heading">Search by Category</h1>
           </div>
+          <p class="section-description">Choose a category to explore community donations.</p>
         </div>
-        <div class="category-grid" aria-label="Filter donation items by category">
-          <button
-            id="category-clothes"
-            class="category-card"
-            type="button"
-            data-item-type="Clothing"
-            aria-pressed="false"
-          >
-            <span class="category-mark" aria-hidden="true">C</span>
-            <span>Clothes</span>
-            <span class="category-status">Filter items</span>
+
+        <div class="category-grid" id="category-grid">
+          <button class="category-card category-clothes" type="button" data-category="clothes" aria-pressed="false">
+            <span class="category-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <path d="M19 11a5 5 0 0 0 10 0M18 10l-8 5-5 8 7 4 4-5v17h18V22l4 5 7-4-5-8-8-5"></path>
+              </svg>
+            </span>
+            <span class="category-name">Clothes</span>
+            <span class="category-count" data-count-for="clothes">0 items</span>
           </button>
-          <div class="category-card" aria-disabled="true">
-            <span class="category-mark" aria-hidden="true">B</span>
-            <span>Books</span>
-            <span class="category-status">Unavailable</span>
-          </div>
-          <div class="category-card" aria-disabled="true">
-            <span class="category-mark" aria-hidden="true">E</span>
-            <span>Electronics</span>
-            <span class="category-status">Unavailable</span>
-          </div>
-          <div class="category-card" aria-disabled="true">
-            <span class="category-mark" aria-hidden="true">+</span>
-            <span>Others</span>
-            <span class="category-status">Unavailable</span>
-          </div>
+
+          <button class="category-card category-books" type="button" data-category="books" aria-pressed="false">
+            <span class="category-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <path d="M7 10h13a5 5 0 0 1 5 5v25a5 5 0 0 0-5-5H7V10Zm34 0H28a5 5 0 0 0-3 1v29a5 5 0 0 1 5-5h11V10Z"></path>
+                <path d="M12 17h8m-8 6h8m10-6h6m-6 6h6"></path>
+              </svg>
+            </span>
+            <span class="category-name">Books</span>
+            <span class="category-count" data-count-for="books">0 items</span>
+          </button>
+
+          <button class="category-card category-electronics" type="button" data-category="electronics" aria-pressed="false">
+            <span class="category-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <rect x="13" y="5" width="22" height="38" rx="4"></rect>
+                <path d="M20 10h8m-7 27h6"></path>
+              </svg>
+            </span>
+            <span class="category-name">Electronics</span>
+            <span class="category-count" data-count-for="electronics">0 items</span>
+          </button>
+
+          <button class="category-card category-others" type="button" data-category="others" aria-pressed="false">
+            <span class="category-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <circle cx="10" cy="24" r="3"></circle>
+                <circle cx="24" cy="24" r="3"></circle>
+                <circle cx="38" cy="24" r="3"></circle>
+                <path d="M24 5a19 19 0 1 0 0 38 19 19 0 0 0 0-38Z"></path>
+              </svg>
+            </span>
+            <span class="category-name">Others</span>
+            <span class="category-count" data-count-for="others">0 items</span>
+          </button>
         </div>
       </section>
 
-      <section class="listings-section" aria-labelledby="listings-heading">
-        <div class="section-heading listings-heading">
+      <section class="items-section" aria-labelledby="items-heading">
+        <div class="items-heading-row">
           <div>
-            <h2 id="listings-heading">Donation items</h2>
-            <p id="result-count" aria-live="polite"></p>
+            <p class="section-kicker">SHARED WITH CARE</p>
+            <h2 id="items-heading">Available Donation Items</h2>
           </div>
+          <p class="items-result-count" id="items-result-count" role="status" aria-live="polite">
+            Loading donations...
+          </p>
         </div>
-        <div id="catalogue-state" class="catalogue-state" role="status" aria-live="polite">
-          Loading listings…
+
+        <div class="catalogue-state state-loading" id="loading-state" role="status">
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <p>Loading available donations...</p>
         </div>
-        <div id="listing-grid" class="listing-grid" aria-busy="true"></div>
+
+        <div class="catalogue-state state-empty" id="empty-state" role="status" hidden>
+          <span class="empty-illustration" aria-hidden="true">
+            <span class="empty-sun"></span>
+            <span class="empty-box"></span>
+            <span class="empty-leaf"></span>
+          </span>
+          <h3 id="empty-title">No donations to show yet</h3>
+          <p id="empty-message">No eligible donation items are available in the local data source.</p>
+        </div>
+
+        <div class="catalogue-state state-error" id="error-state" role="alert" hidden>
+          <span class="error-mark" aria-hidden="true">!</span>
+          <h3>Catalogue data could not be loaded</h3>
+          <p id="error-message">Check that the local JSON source is served alongside the project.</p>
+          <button class="retry-button" id="retry-button" type="button">Try again</button>
+          <button class="file-button" id="choose-data-file" type="button">Choose local JSON file</button>
+          <input class="sr-only" id="local-data-file" type="file" accept=".json,application/json">
+        </div>
+
+        <div class="donation-grid" id="donation-grid" aria-live="polite" aria-busy="false"></div>
       </section>
+
+      <footer class="catalogue-footer">
+        <p>Every reused item is one less thing going to waste.</p>
+      </footer>
     </main>
   </div>
 
   <script type="module" src="/assets/js/sidebar.js"></script>
-  <script type="module" src="./catalogue.js"></script>
+  <script type="module" src="/modules/catalogue/catalogue.js"></script>
 </body>
 </html>
