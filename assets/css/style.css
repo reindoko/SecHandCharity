@@ -7,10 +7,28 @@
 
 /* Global styling for elements in body */
 body {
+  position: relative;
   margin: 0;
   font-family: sans-serif;
   background-color: #ffffff;
   color: #111111;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(rgba(245, 245, 245, 0.6), rgba(250, 250, 250, 0.7)),
+    url("/assets/images/background-photo.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(14px);
+  transform: scale(1.08);
+  pointer-events: none;
 }
 
 /* Hides element */

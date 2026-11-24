@@ -17,7 +17,7 @@
     --ink-soft:  #5d6763;   /* 次要文字 / secondary text */
     --ink-faint: #98a19d;   /* 提示文字、时间 / hints, timestamps */
     --line:      #e8ebe9;   /* 分隔线、边框 / dividers, borders */
-    --surface:   #ffffff;   /* 卡片白底 / card background */
+    --surface:   rgba(255, 255, 255, 0.5);   /* 卡片白底 / card background */
     --canvas:    #f5f7f6;   /* 页面底色 / page background */
     --shadow-sm: 0 1px 2px rgba(20, 35, 25, .05);    /* 小阴影 / small shadow */
     --shadow-md: 0 6px 20px rgba(20, 35, 25, .07);   /* 中阴影 / medium shadow */
@@ -30,7 +30,6 @@
     height: 100vh;                /* 占满整个屏幕高度 / full viewport height */
     box-sizing: border-box;
     padding: 0;
-    background: var(--canvas);
     color: var(--ink);
 }
 
