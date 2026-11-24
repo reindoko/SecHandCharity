@@ -2,6 +2,7 @@ import { supabaseClient } from "/assets/js/supabase-client.js";
 import { attachLocationFilter } from "/assets/js/location.js";
 
 const ELIGIBLE_STATUS = "Available";
+const ITEMS_PER_PAGE = 12;
 const ITEM_FIELDS =
   "id, title, description, location, item_type, condition_type, delivery_type, photo_urls, status, created_at";
 const CATEGORY_ITEM_TYPES = {
@@ -20,19 +21,6 @@ const CATEGORY_ITEM_TYPES = {
   "musical-instruments": "Musical Instruments",
   miscellaneous: "Miscellaneous",
 };
-const OTHER_CATEGORY_KEYS = [
-  "furniture",
-  "home-living",
-  "toys-games",
-  "baby-kids",
-  "sports-outdoor",
-  "shoes-accessories",
-  "beauty-personal-care",
-  "pet-supplies",
-  "automotive-accessories",
-  "musical-instruments",
-  "miscellaneous",
-];
 const CATEGORY_LABELS = {
   clothes: "Clothes",
   books: "Books",
@@ -61,6 +49,10 @@ const othersSubcategoryGrid = document.querySelector("#others-subcategory-grid")
 const backToCategories = document.querySelector("#back-to-categories");
 const itemsHeading = document.querySelector("#items-heading");
 const donationGrid = document.querySelector("#donation-grid");
+const donationPagination = document.querySelector("#donation-pagination");
+const donationPageIndicator = document.querySelector("#donation-page-indicator");
+const previousPageButton = document.querySelector("#donation-previous-page");
+const nextPageButton = document.querySelector("#donation-next-page");
 const loadingState = document.querySelector("#loading-state");
 const emptyState = document.querySelector("#empty-state");
 const errorState = document.querySelector("#error-state");
@@ -74,12 +66,14 @@ let donationItems = [];
 let selectedCategory = "";
 let showingOthersCategories = false;
 let catalogueLoaded = false;
+let currentPage = 1;
 
 function setCatalogueState(state) {
   loadingState.hidden = state !== "loading";
   emptyState.hidden = state !== "empty";
   errorState.hidden = state !== "error";
   donationGrid.hidden = state === "loading" || state === "error" || state === "empty";
+  donationPagination.hidden = state !== "items";
   donationGrid.setAttribute("aria-busy", String(state === "loading"));
 }
 
@@ -216,15 +210,6 @@ function updateCategoryCounts(items) {
     const countElement = categorySection.querySelector(`[data-count-for="${category}"]`);
     countElement.textContent = `${count} ${count === 1 ? "item" : "items"}`;
   }
-
-  const otherItemTypes = OTHER_CATEGORY_KEYS
-    .map((category) => CATEGORY_ITEM_TYPES[category])
-    .filter(Boolean);
-  const othersCount = items.filter((item) =>
-    otherItemTypes.includes(item.item_type)
-  ).length;
-  const othersCountElement = categorySection.querySelector('[data-count-for="others"]');
-  othersCountElement.textContent = `${othersCount} ${othersCount === 1 ? "item" : "items"}`;
 }
 
 function updateCategoryNavigation() {
@@ -260,15 +245,26 @@ function getFilteredItems() {
   });
 }
 
-function renderItems() {
+function renderItems({ resetPage = false } = {}) {
   if (!catalogueLoaded) {
     return;
   }
 
+  if (resetPage) {
+    currentPage = 1;
+  }
+
   const items = getFilteredItems();
+  const pageCount = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
+  currentPage = Math.min(currentPage, pageCount);
+  const firstItemIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const pageItems = items.slice(firstItemIndex, firstItemIndex + ITEMS_PER_PAGE);
   const cards = document.createDocumentFragment();
-  items.forEach((item) => cards.append(createDonationCard(item)));
+  pageItems.forEach((item) => cards.append(createDonationCard(item)));
   donationGrid.replaceChildren(cards);
+  donationPageIndicator.textContent = `Page ${currentPage} of ${pageCount}`;
+  previousPageButton.hidden = currentPage <= 1 || pageCount <= 1;
+  nextPageButton.hidden = currentPage >= pageCount;
   itemsHeading.textContent = selectedCategory
     ? `Available ${CATEGORY_LABELS[selectedCategory]}`
     : "Available Donation Items";
@@ -299,6 +295,7 @@ function renderItems() {
 
 async function loadCatalogue() {
   catalogueLoaded = false;
+  currentPage = 1;
   setCatalogueState("loading");
   resultsCount.textContent = "Loading donations...";
   donationGrid.replaceChildren();
@@ -336,10 +333,10 @@ async function loadCatalogue() {
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
   locationMenu.classList.add("is-hidden");
-  renderItems();
+  renderItems({ resetPage: true });
 });
 
-attachLocationFilter(locationFilter, locationMenu, () => renderItems());
+attachLocationFilter(locationFilter, locationMenu, () => renderItems({ resetPage: true }));
 
 categoryGrid.addEventListener("click", (event) => {
   const button = event.target.closest("[data-category]");
@@ -358,7 +355,7 @@ categoryGrid.addEventListener("click", (event) => {
   }
 
   updateCategoryNavigation();
-  renderItems();
+  renderItems({ resetPage: true });
 });
 
 othersSubcategoryGrid.addEventListener("click", (event) => {
@@ -371,14 +368,28 @@ othersSubcategoryGrid.addEventListener("click", (event) => {
     ? ""
     : button.dataset.subcategory;
   updateCategoryNavigation();
-  renderItems();
+  renderItems({ resetPage: true });
 });
 
 backToCategories.addEventListener("click", () => {
   showingOthersCategories = false;
   selectedCategory = "";
   updateCategoryNavigation();
-  renderItems();
+  renderItems({ resetPage: true });
+});
+
+previousPageButton.addEventListener("click", () => {
+  if (!previousPageButton.hidden) {
+    currentPage -= 1;
+    renderItems();
+  }
+});
+
+nextPageButton.addEventListener("click", () => {
+  if (!nextPageButton.hidden) {
+    currentPage += 1;
+    renderItems();
+  }
 });
 
 retryButton.addEventListener("click", loadCatalogue);

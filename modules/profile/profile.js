@@ -1,7 +1,7 @@
 import { supabaseClient } from "/assets/js/supabase-client.js";
 
 const ITEM_STATUS = "Available";
-const ITEM_PAGE_SIZE = 6;
+const ITEM_PAGE_SIZE = 4;
 const REVIEW_PAGE_SIZE = 100;
 const DEFAULT_AVATAR = "/assets/images/icon-account.png";
 const LOGIN_URL = "/modules/account/login.html";
@@ -21,7 +21,11 @@ const activityCount = document.getElementById("activity-count");
 const activityError = document.getElementById("activity-error");
 const activityEmpty = document.getElementById("activity-empty");
 const activityList = document.getElementById("activity-list");
-const activityMore = document.getElementById("activity-more");
+const activityRetry = document.getElementById("activity-retry");
+const activityPagination = document.getElementById("activity-pagination");
+const activityPageIndicator = document.getElementById("activity-page-indicator");
+const activityPrevious = document.getElementById("activity-previous");
+const activityNext = document.getElementById("activity-next");
 const reviewsError = document.getElementById("reviews-error");
 const reviewAuthPrompt = document.getElementById("review-auth-prompt");
 const reviewList = document.getElementById("review-list");
@@ -36,11 +40,16 @@ const reviewFormStatus = document.getElementById("review-form-status");
 let profileId = null;
 let viewer = null;
 let viewerAuthError = null;
+let isProfileOwner = false;
 let reviews = [];
 let reviewLoadError = null;
 let editingReviewId = null;
 let activities = [];
-let activitiesHaveMore = false;
+let activityPage = 1;
+let activityPageCount = 1;
+let activityTotalCount = 0;
+let activityRequestPage = 1;
+let activityLoading = false;
 
 function escapeHTML(value) {
   return String(value ?? "").replace(/[&<>"']/g, (character) => ({
@@ -112,13 +121,14 @@ function clearInlineError(element) {
 
 function renderProfile(profile) {
   const name = profile.username || "Community member";
+  isProfileOwner = Boolean(viewer?.id && viewer.id === profile.id);
   profileName.textContent = name;
   profileLocation.textContent = profile.location || "Location not provided";
   profileAvatar.src = profile.avatar_url || DEFAULT_AVATAR;
   profileAvatar.alt = `${name}'s profile picture`;
   accountAge.textContent = formatAccountAge(profile.created_at);
   messageLink.href = `/modules/messaging/msg.html?user=${encodeURIComponent(profile.id)}`;
-  messageLink.hidden = Boolean(viewer?.id && viewer.id === profile.id);
+  messageLink.hidden = isProfileOwner;
   document.title = `${name} | Public Profile`;
 }
 
@@ -168,7 +178,9 @@ function renderReviews() {
   } else {
     reviewList.innerHTML = reviews.map((review) => {
       const rating = Math.min(5, Math.max(1, Math.round(Number(review.star_rating) || 1)));
-      const isOwner = Boolean(viewer && review.reviewer_id === viewer.id);
+      const isOwner = Boolean(
+        viewer && !isProfileOwner && review.reviewer_id === viewer.id
+      );
       const author = isOwner ? "You" : (review.reviewer?.username || "Community member");
       const actions = isOwner
         ? `<div class="review-actions">
@@ -188,6 +200,12 @@ function renderReviews() {
         ${actions}
       </article>`;
     }).join("");
+  }
+
+  if (isProfileOwner) {
+    reviewForm.hidden = true;
+    reviewAuthPrompt.hidden = true;
+    return;
   }
 
   if (!viewer) {
@@ -241,8 +259,12 @@ function renderActivities() {
     }, { once: true });
   });
 
-  activityEmpty.hidden = activities.length > 0;
-  activityMore.hidden = !activitiesHaveMore;
+  activityEmpty.hidden = activityTotalCount > 0;
+  activityRetry.hidden = true;
+  activityPagination.hidden = activityTotalCount === 0;
+  activityPageIndicator.textContent = `Page ${activityPage} of ${activityPageCount}`;
+  activityPrevious.hidden = activityPage <= 1 || activityPageCount <= 1;
+  activityNext.hidden = activityPage >= activityPageCount;
 }
 
 async function loadReviews() {
@@ -318,34 +340,56 @@ async function loadItemCount() {
   activityCount.textContent = `${count} ${count === 1 ? "item" : "items"}`;
 }
 
-async function loadMoreActivities() {
-  activityMore.disabled = true;
-  activityMore.textContent = "Loading...";
+async function fetchActivityPage(page) {
+  const { data, count, error } = await supabaseClient
+    .from("items")
+    .select(
+      "id, title, description, location, item_type, condition_type, delivery_type, photo_urls, created_at",
+      { count: "exact" }
+    )
+    .eq("donor_id", profileId)
+    .eq("status", ITEM_STATUS)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range((page - 1) * ITEM_PAGE_SIZE, page * ITEM_PAGE_SIZE - 1);
+
+  if (error) throw error;
+  if (count === null) {
+    throw new Error("Supabase did not return an exact count for published items.");
+  }
+
+  return { items: Array.isArray(data) ? data : [], count };
+}
+
+async function loadActivityPage(page) {
+  if (activityLoading) return;
+
+  activityLoading = true;
+  activityRequestPage = page;
+  activityRetry.hidden = true;
+  activityRetry.disabled = true;
   clearInlineError(activityError);
 
   try {
-    const { data, error } = await supabaseClient
-      .from("items")
-      .select("id, title, description, location, item_type, condition_type, delivery_type, photo_urls, created_at")
-      .eq("donor_id", profileId)
-      .eq("status", ITEM_STATUS)
-      .order("created_at", { ascending: false })
-      .order("id", { ascending: false })
-      .range(activities.length, activities.length + ITEM_PAGE_SIZE - 1);
+    let result = await fetchActivityPage(page);
+    const pageCount = Math.max(1, Math.ceil(result.count / ITEM_PAGE_SIZE));
+    const targetPage = Math.min(Math.max(page, 1), pageCount);
+    if (targetPage !== page) {
+      result = await fetchActivityPage(targetPage);
+    }
 
-    if (error) throw error;
-
-    const page = Array.isArray(data) ? data : [];
-    activities.push(...page);
-    activitiesHaveMore = page.length === ITEM_PAGE_SIZE;
+    activityPage = targetPage;
+    activityPageCount = pageCount;
+    activityTotalCount = result.count;
+    activities = result.items;
     renderActivities();
   } catch (error) {
     console.error("Could not load profile activity:", error);
     setInlineError(activityError, error, "Donations could not be loaded");
-    activityMore.hidden = false;
+    activityRetry.hidden = false;
   } finally {
-    activityMore.disabled = false;
-    activityMore.textContent = "View More";
+    activityLoading = false;
+    activityRetry.disabled = false;
   }
 }
 
@@ -356,7 +400,7 @@ function displayReviewFormMessage(message, isError = false) {
 
 async function saveReview(event) {
   event.preventDefault();
-  if (!viewer || !profileId || reviewLoadError) return;
+  if (!viewer || !profileId || reviewLoadError || isProfileOwner) return;
 
   const comment = reviewComment.value.trim();
   const starRating = Number(reviewRating.value);
@@ -408,7 +452,12 @@ async function saveReview(event) {
 }
 
 async function deleteReview(reviewId) {
-  if (!viewer || !profileId || !window.confirm("Delete your review? This cannot be undone.")) return;
+  if (
+    !viewer ||
+    !profileId ||
+    isProfileOwner ||
+    !window.confirm("Delete your review? This cannot be undone.")
+  ) return;
 
   try {
     const { data, error } = await supabaseClient
@@ -436,7 +485,7 @@ async function deleteReview(reviewId) {
 
 function editReview(reviewId) {
   const review = reviews.find((entry) => String(entry.id) === String(reviewId));
-  if (!viewer || !review || review.reviewer_id !== viewer.id) return;
+  if (!viewer || isProfileOwner || !review || review.reviewer_id !== viewer.id) return;
   editingReviewId = review.id;
   reviewFormHeading.textContent = "Update your review";
   reviewSubmit.textContent = "Save changes";
@@ -495,13 +544,23 @@ async function init() {
   await Promise.all([
     loadReviews(),
     loadItemCount(),
-    loadMoreActivities(),
+    loadActivityPage(1),
   ]);
 }
 
 reviewForm.addEventListener("submit", saveReview);
 reviewCancel.addEventListener("click", restoreReviewEditor);
-activityMore.addEventListener("click", loadMoreActivities);
+activityRetry.addEventListener("click", () => loadActivityPage(activityRequestPage));
+activityPrevious.addEventListener("click", () => {
+  if (!activityLoading && !activityPrevious.hidden) {
+    loadActivityPage(activityPage - 1);
+  }
+});
+activityNext.addEventListener("click", () => {
+  if (!activityLoading && !activityNext.hidden) {
+    loadActivityPage(activityPage + 1);
+  }
+});
 reviewList.addEventListener("click", (event) => {
   const editButton = event.target.closest("[data-review-edit]");
   if (editButton) {

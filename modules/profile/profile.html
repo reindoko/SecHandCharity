@@ -64,7 +64,12 @@
             No published donations are publicly available to show.
           </div>
           <div id="activity-list" class="activity-grid"></div>
-          <button id="activity-more" class="secondary-button" type="button" hidden>View More</button>
+          <button id="activity-retry" class="secondary-button" type="button" hidden>Retry</button>
+          <nav id="activity-pagination" class="activity-pagination" aria-label="Recent donation pages" hidden>
+            <button id="activity-previous" class="secondary-button" type="button" hidden>Back</button>
+            <span id="activity-page-indicator" class="activity-page-indicator" aria-live="polite">Page 1 of 1</span>
+            <button id="activity-next" class="secondary-button" type="button" hidden>Next</button>
+          </nav>
         </section>
 
         <section class="profile-section reviews-section" aria-labelledby="reviews-heading">
