@@ -8,9 +8,26 @@
   <link rel="stylesheet" href="/assets/css/style.css">
   <link rel="stylesheet" href="/assets/css/sidebar.css">
   <link rel="stylesheet" href="./profile.css">
+  <style>
+    .profile-back-button {
+      gap: 8px;
+      margin-top: 16px;
+      margin-bottom: 16px;
+    }
+
+    .profile-back-button img {
+      width: 16px;
+      height: 16px;
+    }
+  </style>
 </head>
 <body>
   <div class="profile-page">
+    <button id="profile-back" class="secondary-button profile-back-button" type="button">
+      <img src="/assets/images/icon-back-arrow.png" alt="">
+      Back
+    </button>
+
     <div id="page-status" class="profile-state" role="status" aria-live="polite">
       Loading profile...
     </div>
@@ -109,5 +126,16 @@
   <script type="module" src="/assets/js/sidebar.js"></script>
   <script type="module" src="/assets/js/script.js"></script>
   <script type="module" src="./profile.js"></script>
+  <script>
+    document.getElementById("profile-back").addEventListener("click", () => {
+      const previousPage = document.referrer ? new URL(document.referrer) : null;
+      if (previousPage && previousPage.origin === window.location.origin && window.history.length > 1) {
+        window.history.back();
+        return;
+      }
+
+      window.location.assign("/modules/catalogue/catalogue.html");
+    });
+  </script>
 </body>
 </html>

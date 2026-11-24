@@ -50,6 +50,7 @@ let activityPageCount = 1;
 let activityTotalCount = 0;
 let activityRequestPage = 1;
 let activityLoading = false;
+let openingConversation = false;
 
 function escapeHTML(value) {
   return String(value ?? "").replace(/[&<>"']/g, (character) => ({
@@ -130,6 +131,55 @@ function renderProfile(profile) {
   messageLink.href = `/modules/messaging/msg.html?user=${encodeURIComponent(profile.id)}`;
   messageLink.hidden = isProfileOwner;
   document.title = `${name} | Public Profile`;
+}
+
+async function findConversationWith(targetId) {
+  const { data, error } = await supabaseClient
+    .from("chatrooms")
+    .select("id")
+    .or(`and(donor_id.eq.${viewer.id},recipient_id.eq.${targetId}),and(donor_id.eq.${targetId},recipient_id.eq.${viewer.id})`)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+async function openConversation(event) {
+  if (!viewer || !profileId || viewer.id === profileId) return;
+  event.preventDefault();
+  if (openingConversation) return;
+
+  openingConversation = true;
+  messageLink.setAttribute("aria-disabled", "true");
+  messageLink.textContent = "Opening...";
+
+  try {
+    let conversation = await findConversationWith(profileId);
+    if (!conversation) {
+      const { data, error } = await supabaseClient
+        .from("chatrooms")
+        .insert({ donor_id: profileId, recipient_id: viewer.id })
+        .select("id")
+        .single();
+
+      if (error) {
+        conversation = await findConversationWith(profileId);
+        if (!conversation) throw error;
+      } else {
+        conversation = data;
+      }
+    }
+
+    window.location.href = `/modules/messaging/msg.html?chatroom=${encodeURIComponent(conversation.id)}`;
+  } catch (error) {
+    console.error("Could not open profile conversation:", error);
+    window.alert(`Could not open conversation: ${errorText(error)}`);
+    messageLink.textContent = "Message";
+    messageLink.removeAttribute("aria-disabled");
+    openingConversation = false;
+  }
 }
 
 function updateRatingSummary() {
@@ -549,6 +599,7 @@ async function init() {
 }
 
 reviewForm.addEventListener("submit", saveReview);
+messageLink.addEventListener("click", openConversation);
 reviewCancel.addEventListener("click", restoreReviewEditor);
 activityRetry.addEventListener("click", () => loadActivityPage(activityRequestPage));
 activityPrevious.addEventListener("click", () => {
