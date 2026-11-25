@@ -4,7 +4,8 @@ import { ensureUserProfile } from "./auth.js";
 
 const LOGIN_URL = "/modules/account/login.html";
 const RESET_PASSWORD_URL = "/modules/account/reset-password.html";
-const AVATAR_BUCKET = "avatar";
+const PUBLIC_PROFILE_URL = "/modules/profile/profile.html";
+const AVATAR_BUCKET = "avatars";
 const DELETE_CONFIRM_TIMEOUT_MS = 3000;
 
 const avatarImg = document.getElementById("settings-avatar");
@@ -18,7 +19,10 @@ const locationSearchInput = document.getElementById("settings-location-search");
 const locationMenu = document.getElementById("settings-location-menu");
 const locationHiddenInput = document.getElementById("settings-location");
 
+const publicProfileLink = document.getElementById("view-public-profile-link");
+
 const saveBtn = document.getElementById("save-settings-btn");
+const cancelBtn = document.getElementById("cancel-settings-btn");
 const formError = document.getElementById("settings-form-error");
 const changePasswordBtn = document.getElementById("change-password-btn");
 const signOutBtn = document.getElementById("sign-out-btn");
@@ -44,6 +48,37 @@ function clearAllErrors() {
     "settings-location-error",
     "settings-form-error",
   ].forEach((id) => setError(id, ""));
+}
+
+function showActionButtons() {
+  if (saveBtn) saveBtn.hidden = false;
+  if (cancelBtn) cancelBtn.hidden = false;
+}
+
+function hideActionButtons() {
+  if (saveBtn) saveBtn.hidden = true;
+  if (cancelBtn) cancelBtn.hidden = true;
+}
+
+function lockAllFields() {
+  usernameInput?.setAttribute("readonly", "");
+  usernameInput?.blur();
+  locationSearchInput?.setAttribute("readonly", "");
+  locationSearchInput?.blur();
+  locationMenu?.classList.add("is-hidden");
+  hideActionButtons();
+}
+
+function resetEditState() {
+  clearAllErrors();
+  if (currentProfile) {
+    const savedLocation = currentProfile.location || "";
+    usernameInput.value = currentProfile.username || "";
+    selectedLocation = savedLocation;
+    locationSearchInput.value = savedLocation;
+    if (locationHiddenInput) locationHiddenInput.value = savedLocation;
+  }
+  lockAllFields();
 }
 
 function resetDeleteConfirmation() {
@@ -106,14 +141,14 @@ function openLocationDropdown() {
   locationSearchInput.focus();
   locationSearchInput.dispatchEvent(new Event("input", { bubbles: true }));
   locationMenu.classList.remove("is-hidden");
-  if (saveBtn) saveBtn.hidden = false;
+  showActionButtons();
 }
 
 function unlockTextInput(input) {
   if (!input) return;
   input.removeAttribute("readonly");
   input.focus();
-  if (saveBtn) saveBtn.hidden = false;
+  showActionButtons();
 }
 
 function activateField(field) {
@@ -125,11 +160,9 @@ function activateField(field) {
     window.location.href = RESET_PASSWORD_URL;
     return;
   }
-  const inputMap = {
-    username: usernameInput,
-    email: emailInput,
-  };
-  unlockTextInput(inputMap[field]);
+  if (field === "username") {
+    unlockTextInput(usernameInput);
+  }
 }
 
 attachLocationFilter(locationSearchInput, locationMenu, (chosenLocation) => {
@@ -137,9 +170,7 @@ attachLocationFilter(locationSearchInput, locationMenu, (chosenLocation) => {
   if (locationHiddenInput) {
     locationHiddenInput.value = selectedLocation;
   }
-  if (saveBtn) {
-    saveBtn.hidden = false;
-  }
+  showActionButtons();
 });
 
 locationSearchInput?.addEventListener("input", () => {
@@ -147,7 +178,7 @@ locationSearchInput?.addEventListener("input", () => {
   if (locationHiddenInput) {
     locationHiddenInput.value = selectedLocation;
   }
-  if (saveBtn) saveBtn.hidden = false;
+  showActionButtons();
 });
 
 async function loadSettingsPage() {
@@ -158,6 +189,10 @@ async function loadSettingsPage() {
   }
 
   currentUser = session.user;
+  if (publicProfileLink) {
+    publicProfileLink.href = `${PUBLIC_PROFILE_URL}?userId=${encodeURIComponent(currentUser.id)}`;
+  }
+
   await ensureUserProfile(currentUser);
 
   const { data: profile, error: profileError } = await supabaseClient
@@ -203,11 +238,14 @@ document.querySelectorAll(".edit-icon-btn[data-field], .dropdown-icon-btn[data-f
 });
 
 usernameInput?.addEventListener("click", () => activateField("username"));
-emailInput?.addEventListener("click", () => activateField("email"));
 passwordInput?.addEventListener("click", () => activateField("password"));
 locationSearchInput?.addEventListener("click", (event) => {
   event.stopPropagation();
   activateField("location");
+});
+
+cancelBtn?.addEventListener("click", () => {
+  resetEditState();
 });
 
 saveBtn?.addEventListener("click", async () => {
@@ -216,7 +254,6 @@ saveBtn?.addEventListener("click", async () => {
 
   const newUsername = usernameInput.value.trim();
   const newLocation = locationSearchInput.value.trim();
-  const newEmail = emailInput.value.trim();
 
   if (!newUsername) {
     setError("settings-username-error", "Username cannot be empty.");
@@ -224,6 +261,7 @@ saveBtn?.addEventListener("click", async () => {
   }
 
   saveBtn.disabled = true;
+  if (cancelBtn) cancelBtn.disabled = true;
   saveBtn.textContent = "Saving...";
 
   try {
@@ -237,29 +275,20 @@ saveBtn?.addEventListener("click", async () => {
 
     if (updateProfileError) throw updateProfileError;
 
-    if (newEmail && newEmail !== currentUser.email) {
-      const { error: emailError } = await supabaseClient.auth.updateUser({ email: newEmail });
-      if (emailError) throw emailError;
-    }
-
     currentProfile = {
       ...currentProfile,
       username: newUsername,
       location: newLocation,
-      email: newEmail || currentProfile?.email,
     };
     selectedLocation = newLocation;
     locationSearchInput.value = newLocation;
     if (locationHiddenInput) locationHiddenInput.value = newLocation;
-    usernameInput.setAttribute("readonly", "");
-    emailInput.setAttribute("readonly", "");
-    locationSearchInput.setAttribute("readonly", "");
-    locationMenu?.classList.add("is-hidden");
-    saveBtn.hidden = true;
+    lockAllFields();
   } catch (err) {
     setError("settings-form-error", err.message || "Failed to update settings.");
   } finally {
     saveBtn.disabled = false;
+    if (cancelBtn) cancelBtn.disabled = false;
     saveBtn.textContent = "Save Changes";
   }
 });
@@ -272,7 +301,7 @@ avatarFileInput?.addEventListener("change", async (e) => {
   clearAllErrors();
 
   const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
-  const path = `avatars/${currentUser.id}/${Date.now()}.${ext}`;
+  const path = `${currentUser.id}/${Date.now()}.${ext}`;
 
   changeAvatarBtn.disabled = true;
   changeAvatarBtn.textContent = "Uploading...";

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecHandCharity - Appointments</title>
+
+    <!-- 样式表（路径开头的 / 不能少） / Stylesheets (the leading "/" is required) -->
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/sidebar.css">
+    <link rel="stylesheet" href="/modules/collection/appointments.css">
+</head>
+<body>
+    <!-- 整体布局：左边侧边栏 + 右边主内容 / Overall layout: sidebar + main content -->
+    <div class="app-layout">
+        <aside id="sidebar"></aside>
+
+        <main class="main-content">
+            <!-- 页面标题 / Page title -->
+            <header class="appt-header">
+                <h1>Your Appointments</h1>
+            </header>
+
+            <section class="appt-layout">
+
+                <!-- 左边：标签页 + 预约列表 / Left: tabs + appointment list -->
+                <section class="appt-main">
+                    <!-- 标签页：别人向我预约（默认）/ 我向别人预约；红点 = 等我处理的请求数量
+                         Tabs: requests made to me (default) / bookings I made; the red badge = requests waiting for my decision -->
+                    <div class="tabs" id="tabs">
+                        <button type="button" class="tab active" data-view="received">Requests to me <span class="tab-badge" id="newBadge" hidden>0</span></button>
+                        <button type="button" class="tab" data-view="sent">My bookings</button>
+                    </div>
+
+                    <!-- 表头 / Table header -->
+                    <div class="appt-head">
+                        <span>No.</span>
+                        <span id="colWho">Requested by</span>
+                        <span>Time &amp; Date</span>
+                        <span>Location</span>
+                        <span>Status</span>
+                        <span>View</span>
+                    </div>
+
+                    <!-- 预约列表由 Appointments.js 生成 / The list is rendered by Appointments.js -->
+                    <ul id="apptList" class="appt-list"></ul>
+                </section>
+
+                <!-- 右边：预约详情（由 Appointments.js 生成） / Right: appointment details (rendered by Appointments.js) -->
+                <aside class="appt-details" id="details"></aside>
+            </section>
+        </main>
+    </div>
+
+    <!-- 新建 / 编辑预约的弹窗 / Modal for creating / editing an appointment -->
+    <div id="modal" class="modal" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+            <header class="modal-head">
+                <h2 id="formTitle">New pickup appointment</h2>
+                <button type="button" id="closeModal" class="x-btn" title="Close">✕</button>
+            </header>
+
+            <form id="apptForm" autocomplete="off">
+                <!-- 以下两项只在“新建”时显示 / The next two fields only show when creating -->
+                <div class="field create-only">
+                    <label for="fDonor">Donor</label>
+                    <select id="fDonor"></select>
+                </div>
+
+                <div class="field create-only">
+                    <label>Donation items</label>
+                    <div id="fItems" class="items-pick"></div>
+                </div>
+
+                <!-- 取货地点、日期、时间 / Pickup location, date, time -->
+                <div class="field">
+                    <label for="fLocation">Pickup location</label>
+                    <input id="fLocation" type="text" maxlength="120" placeholder="e.g. Likas, Kota Kinabalu" required>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="fDate">Pickup date</label>
+                        <input id="fDate" type="date" required>
+                    </div>
+                    <div class="field">
+                        <label for="fTime">Pickup time</label>
+                        <input id="fTime" type="time" required>
+                    </div>
+                </div>
+
+                <p id="formError" class="form-error" hidden></p>
+
+                <footer class="modal-foot">
+                    <button type="button" id="cancelForm" class="btn btn-gray">Close</button>
+                    <button type="submit" id="submitBtn" class="btn btn-primary">Create appointment</button>
+                </footer>
+            </form>
+        </div>
+    </div>
+
+    <!-- 脚本 / Scripts -->
+    <script type="module" src="/assets/js/sidebar.js"></script>
+    <script type="module" src="/assets/js/script.js"></script>
+    <script type="module" src="/modules/collection/appointments.js"></script>
+</body>
+</html>
