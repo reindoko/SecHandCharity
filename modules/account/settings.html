@@ -43,10 +43,14 @@
               <div class="settings-row">
                 <label for="settings-email">Email</label>
                 <div class="settings-pill-wrap">
-                  <input id="settings-email" class="settings-pill-input" type="email" readonly>
-                  <button type="button" class="edit-icon-btn" data-field="email" aria-label="Edit email">
-                    <img src="/assets/images/icon-edit.png" alt="">
-                  </button>
+                  <input
+                    id="settings-email"
+                    class="settings-pill-input settings-pill-input--locked"
+                    type="email"
+                    readonly
+                    tabindex="-1"
+                    aria-readonly="true"
+                  >
                 </div>
                 <small class="field-error" id="settings-email-error"></small>
               </div>
@@ -86,22 +90,30 @@
 
               <div class="privacy-banner">
                 <span class="privacy-info-icon" aria-hidden="true">i</span>
-                <span>Please do not disclose your personal information publicly.</span>
+                <span>Please do not disclose your personal information publicly to ensure safety.</span>
               </div>
             </div>
           </div>
 
           <div class="settings-status-bar">
             <small class="field-error" id="settings-form-error"></small>
-            <button type="button" id="save-settings-btn" class="pill-action-btn" hidden>Save Changes</button>
+            <div class="settings-actions">
+              <button type="button" id="cancel-settings-btn" class="pill-action-btn pill-action-btn--secondary" hidden>Cancel</button>
+              <button type="button" id="save-settings-btn" class="pill-action-btn" hidden>Save Changes</button>
+            </div>
           </div>
         </section>
 
         <!-- 2. Public Profile -->
         <section class="settings-block">
           <h2 class="settings-title">
-            <span>Public Profile</span>
-            <a href="./profile.html" id="view-public-profile-link" class="public-profile-link" aria-label="Open public profile">
+            <a
+              href="/modules/profile/profile.html"
+              id="view-public-profile-link"
+              class="public-profile-link"
+              aria-label="Open public profile"
+            >
+              <span>Public Profile</span>
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                 <polyline points="15 3 21 3 21 9"></polyline>
