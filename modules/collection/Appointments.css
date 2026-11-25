@@ -1,0 +1,434 @@
+/* =========================================================
+   预约页面样式 / Appointments page styles
+   风格与消息页面一致 / Same look as the messaging page
+   侧边栏样式不在这里 / Sidebar styles are NOT in this file (see sidebar.css)
+   ========================================================= */
+
+/* ---------- 颜色与阴影变量 / Colour & shadow variables ---------- */
+:root {
+    --green-50:  #f1f9ee;   /* 最浅绿 / lightest green */
+    --green-100: #e2f3dc;   /* 浅绿（悬停） / light green (hover) */
+    --green-300: #9ad78f;   /* 中绿（焦点边框） / mid green (focus border) */
+    --green-500: #5db858;   /* 主绿色 / main green */
+    --green-700: #2f7d33;   /* 最深绿（标题） / darkest green (titles) */
+    --green-800: #78ad4a;   /* 按钮、重点色 / buttons, accent */
+    --ink:       #1c2321;   /* 主要文字 / main text */
+    --ink-soft:  #5d6763;   /* 次要文字 / secondary text */
+    --ink-faint: #98a19d;   /* 提示文字 / hints */
+    --line:      #e8ebe9;   /* 分隔线、边框 / dividers, borders */
+    --surface:   rgba(255, 255, 255, 0.5);   /* 卡片白底（半透明） / card background (semi-transparent) */
+    --canvas:    #f5f7f6;   /* 浅灰底 / light grey */
+    --shadow-sm: 0 1px 2px rgba(20, 35, 25, .05);
+    --shadow-md: 0 6px 20px rgba(20, 35, 25, .07);
+}
+
+/* ---------- 状态颜色 / Status colours ----------
+   --c 主色，--c-soft 浅底色，--c-dark 深文字色
+   --c main colour, --c-soft light background, --c-dark dark text */
+.st-accepted  { --c: #78ad4a; --c-soft: #eef6e6; --c-dark: #4d7a2a; }
+.st-pending   { --c: #f0a030; --c-soft: #fff3df; --c-dark: #a8670c; }
+.st-completed { --c: #8d9692; --c-soft: #eff1f0; --c-dark: #5d6763; }
+.st-cancelled { --c: #e5484d; --c-soft: #fdeceb; --c-dark: #b5292e; }
+
+[hidden] { display: none !important; }   /* hidden 属性必须真正隐藏 / make [hidden] really hide */
+
+/* ---------- 页面外框 / Page frame ---------- */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    box-sizing: border-box;
+    padding: 0;
+    color: var(--ink);
+}
+
+.appt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 28px 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+}
+.appt-header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; }
+
+/* 两栏：左边列表，右边详情 / Two columns: list (left), details (right) */
+.appt-layout {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 420px;
+    gap: 20px;
+    padding: 20px 28px 24px;
+}
+
+/* ---------- 共用卡片 / Shared card ---------- */
+.appt-main,
+.appt-details {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    min-height: 0;
+}
+
+/* ---------- 按钮 / Buttons ---------- */
+.btn {
+    border: 0;
+    border-radius: 999px;
+    padding: 10px 22px;
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color .15s, transform .1s, box-shadow .15s;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-primary { background: var(--green-800); color: #fff; box-shadow: 0 3px 10px rgba(120, 173, 74, .35); }
+.btn-primary:hover:not(:disabled) { background: #6a9c40; }
+.btn-gray   { background: #e6e9e8; color: var(--ink); }
+.btn-gray:hover:not(:disabled) { background: #d9dedc; }
+.btn-danger { background: #e5484d; color: #fff; }
+.btn-danger:hover:not(:disabled) { background: #cf3a3f; }
+.btn-ghost  { background: transparent; color: var(--green-700); border: 1.5px solid var(--green-800); }
+.btn-ghost:hover:not(:disabled) { background: var(--green-50); }
+.btn-block  { width: 100%; margin-top: 10px; }
+
+/* ---------- 左边：标签页 + 列表 / Left: tabs + list ---------- */
+.appt-main {
+    display: flex;
+    flex-direction: column;
+    padding: 22px;
+}
+
+/* 标签页：Requests to me / My bookings / Tabs */
+.tabs {
+    display: inline-flex;
+    align-self: flex-start;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 20px;
+    background: var(--canvas);
+    border-radius: 999px;
+}
+.tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color .15s, color .15s;
+}
+.tab:hover { color: var(--ink); }
+.tab.active { background: var(--green-800); color: #fff; box-shadow: 0 2px 8px rgba(120, 173, 74, .35); }
+.tab-badge {                                   /* 红点：等我处理的请求数量 / red badge: requests waiting for me */
+    min-width: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #e5484d;
+    color: #fff;
+    font-size: 0.72rem;
+    line-height: 20px;
+    text-align: center;
+}
+
+/* 表头和每一行共用同一组列宽 / Header and rows share the same columns */
+.appt-head,
+.appt-row {
+    display: grid;
+    grid-template-columns: 56px 1.3fr 1.2fr 1.5fr 120px 64px;
+    gap: 12px;
+    align-items: center;
+}
+.appt-head {
+    padding: 10px 18px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background: var(--canvas);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+}
+
+.appt-list {
+    list-style: none;
+    margin: 0;
+    padding: 2px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.list-empty { padding: 36px 16px; text-align: center; color: var(--ink-faint); font-size: 0.98rem; }
+
+/* 每一行预约 / One appointment row */
+.appt-row {
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s, background-color .15s;
+}
+.appt-row:hover { box-shadow: var(--shadow-md); border-color: var(--green-300); }
+.appt-row.selected { background: var(--green-50); border-color: var(--green-800); box-shadow: 0 0 0 2px rgba(120, 173, 74, .25); }
+
+/* 等我处理的请求：左边加橙色条 / Rows waiting for me get an orange bar on the left
+   （pending 等我同意；accepted 等我完成） / (pending = accept/decline; accepted = complete/cancel) */
+.appt-row.needs-action { border-left: 5px solid #f0a030; }
+
+.appt-row .no { font-weight: 700; font-size: 1.05rem; }
+.appt-row .who { font-weight: 600; font-size: 1rem; color: var(--green-700); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.appt-row .who em { font-style: normal; font-size: 0.75rem; color: var(--ink-faint); font-weight: 500; }
+.appt-row .when strong { display: block; font-size: 0.95rem; }
+.appt-row .when span { font-size: 0.85rem; color: var(--ink-soft); }
+.appt-row .where {                                   /* 地点胶囊 / location pill */
+    justify-self: start;
+    max-width: 100%;
+    padding: 5px 14px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 状态标签 / Status badge */
+.badge {
+    justify-self: start;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--c-soft);
+    color: var(--c-dark);
+    border: 1px solid var(--c);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+/* 眼睛按钮 / Eye (view) button */
+.eye {
+    width: 40px; height: 40px;
+    border: 0;
+    border-radius: 12px;
+    background: #d9dedc;
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color .15s;
+}
+.eye:hover, .appt-row.selected .eye { background: var(--green-800); color: #fff; }
+
+/* ---------- 右边：预约详情 / Right: appointment details ---------- */
+.appt-details {
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.details-empty { margin: auto; text-align: center; color: var(--ink-faint); font-size: 1rem; }
+.details-empty::before { content: "📅"; display: block; font-size: 2.8rem; margin-bottom: 10px; opacity: .55; }
+
+/* 顶部大卡片：渐变色随状态变化 / Hero card: gradient follows the status colour */
+.d-hero {
+    padding: 18px 20px;
+    border-radius: 18px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 65%, #000));
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--c) 35%, transparent);
+}
+.d-hero-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.d-hero-no { font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
+.d-hero-status {
+    padding: 4px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .25);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+.d-hero-when { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.d-hero-when .chip { padding: 10px 14px; border-radius: 14px; background: rgba(255, 255, 255, .18); }
+.d-hero-when small { display: block; font-size: 0.7rem; opacity: .85; text-transform: uppercase; letter-spacing: .05em; }
+.d-hero-when strong { font-size: 1.1rem; }
+
+/* 分区卡片 / Section cards */
+.d-card {
+    padding: 16px 18px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+}
+.sec-title { margin: 0 0 12px; font-size: 0.78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--green-700); }
+
+/* 物品 / Items */
+.d-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.d-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 12px; background: var(--canvas); font-weight: 600; font-size: 0.95rem; }
+.thumb {
+    width: 52px; height: 52px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: linear-gradient(135deg, var(--green-100), var(--canvas));
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+}
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* 人员 / People */
+.person { display: flex; align-items: center; gap: 12px; padding: 6px 0; }
+.person small { display: block; font-size: 0.72rem; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .04em; }
+.person strong { font-size: 0.98rem; }
+.avatar {
+    width: 40px; height: 40px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green-500), var(--green-800));
+    color: #fff;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* 地点 + 地图 / Location + map */
+.loc-line { margin: 0 0 10px; font-weight: 600; font-size: 0.98rem; }
+.loc { font-size: 0.85rem; color: var(--ink-soft); margin: 0; }
+.map-box {
+    position: relative;
+    height: 170px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--canvas);
+}
+.map-box iframe { width: 100%; height: 100%; border: 0; pointer-events: none; }   /* 点击由下面的链接处理 / clicks handled by the link below */
+.map-box a { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center; text-decoration: none; }
+.map-box a span {
+    margin-bottom: 8px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .92);
+    color: var(--ink);
+    font-size: 0.72rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+}
+
+/* 按钮区固定在底部 / Action bar sticks to the bottom */
+.d-actions {
+    position: sticky;
+    bottom: -20px;
+    margin: auto -20px -20px;
+    padding: 14px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: linear-gradient(to top, #fff 70%, rgba(255, 255, 255, 0));
+}
+.d-actions .btn { flex: 1 1 110px; }
+
+/* 提示条 / Notes */
+.d-note { margin: 0; padding: 12px 16px; border-radius: 14px; background: #fff8e1; border: 1px solid #f3e3a4; color: #7a6512; font-size: 0.88rem; line-height: 1.45; }
+.d-note.is-action { background: #fff3df; border-color: #f0a030; border-left-width: 5px; color: #7a4a05; font-size: 0.92rem; }   /* 需要我处理 / needs my decision */
+
+/* ---------- 弹窗 / Modal ---------- */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(20, 35, 25, .45);
+}
+.modal-card {
+    width: min(560px, 100%);
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 26px;
+    background: #fff;                    /* 弹窗必须是实心白色 / modal must be solid white */
+    border-radius: 22px;
+    box-shadow: 0 20px 60px rgba(20, 35, 25, .25);
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.modal-head h2 { margin: 0; font-size: 1.3rem; }
+.x-btn { width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--canvas); cursor: pointer; font-size: 0.95rem; }
+.x-btn:hover { background: #fdeceb; color: #c0392b; }
+
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; min-width: 0; }
+.field label { font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); }
+.field input, .field select {
+    padding: 11px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--canvas);
+    font: inherit;
+    font-size: 1rem;
+    color: var(--ink);
+    transition: border-color .15s, box-shadow .15s, background-color .15s;
+}
+.field input:focus, .field select:focus {
+    outline: none;
+    background: #fff;
+    border-color: var(--green-300);
+    box-shadow: 0 0 0 3px rgba(93, 184, 88, .15);
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* “编辑”模式隐藏只用于新建的栏位 / In edit mode, hide the create-only fields */
+.modal.is-edit .create-only { display: none; }
+
+/* 物品多选列表 / Item multi-select list */
+.items-pick { max-height: 210px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--canvas); }
+.items-pick .hint { margin: 0; padding: 14px; color: var(--ink-faint); font-size: 0.9rem; text-align: center; }
+.item-opt { display: flex; align-items: center; gap: 12px; padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--line); }
+.item-opt:last-child { border-bottom: 0; }
+.item-opt:hover { background: var(--green-50); }
+.item-opt input { width: 18px; height: 18px; accent-color: var(--green-800); }
+.item-opt .thumb { width: 44px; height: 44px; border-radius: 10px; }
+.item-opt span.t { font-weight: 600; font-size: 0.95rem; }
+
+.form-error { margin: 0 0 14px; padding: 10px 14px; border-radius: 12px; background: #fdeceb; color: #b5292e; font-size: 0.88rem; }
+.modal-foot { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+
+/* ---------- 滚动条 / Scrollbars ---------- */
+.appt-list, .appt-details, .items-pick { scrollbar-width: thin; scrollbar-color: #d5dbd8 transparent; }
+
+/* ---------- 小屏幕 / Small screens ---------- */
+@media (max-width: 1100px) {
+    .appt-layout { grid-template-columns: 1fr; grid-template-rows: auto auto; overflow-y: auto; }
+    .appt-details { min-height: 320px; }
+}
+@media (max-width: 720px) {
+    .appt-layout { padding: 14px; gap: 14px; }
+    .appt-main { padding: 14px; }
+    .appt-head { display: none; }                         /* 手机上隐藏表头 / hide table header on phones */
+    .appt-row { grid-template-columns: 40px 1fr auto; row-gap: 6px; }
+    .appt-row .where { grid-column: 2 / 4; }
+    .field-row { grid-template-columns: 1fr; }
+}
