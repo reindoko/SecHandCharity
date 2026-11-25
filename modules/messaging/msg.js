@@ -11,7 +11,7 @@
 // =====================================================================
 import { supabaseClient } from "/assets/js/supabase-client.js";
 
-const BUCKET = "photos";     // 图片 bucket 名字 / storage bucket name
+const BUCKET = "media";     // 图片 bucket 名字 / storage bucket name
 const MAX_IMAGE_MB = 5;      // 图片大小上限 (MB) / max image size in MB
 
 // ---------- 页面元素 / DOM elements ----------
