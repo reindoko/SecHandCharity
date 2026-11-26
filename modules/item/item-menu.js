@@ -29,11 +29,16 @@ function setPageError(msg = "") {
 }
 
 function normalizeStatus(status) {
-  const clean = (status || "drafted").toLowerCase().trim();
+  const clean = String(status || "Drafted").toLowerCase().trim();
   if (STATUS_OPTIONS.some((opt) => opt.value === clean)) {
     return clean;
   }
   return "drafted";
+}
+
+function formatStatusForDb(status) {
+  const normalized = normalizeStatus(status);
+  return STATUS_OPTIONS.find((opt) => opt.value === normalized)?.label || "Drafted";
 }
 
 function getStatusLabel(status) {
@@ -43,6 +48,40 @@ function getStatusLabel(status) {
 
 function getStatusTriggerClass(status) {
   return `status-dropdown-trigger--${normalizeStatus(status)}`;
+}
+
+function getItemPermissions(status) {
+  const s = normalizeStatus(status);
+
+  if (s === "completed") {
+    return {
+      canEdit: false,
+      canComplete: false,
+      canDelete: true,
+    };
+  }
+
+  if (s === "reserved") {
+    return {
+      canEdit: false,
+      canComplete: true,
+      canDelete: true,
+    };
+  }
+
+  if (s === "drafted") {
+    return {
+      canEdit: true,
+      canComplete: false,
+      canDelete: true,
+    };
+  }
+
+  return {
+    canEdit: true,
+    canComplete: true,
+    canDelete: true,
+  };
 }
 
 function getThumbnailUrl(item) {
@@ -215,10 +254,10 @@ function renderItems() {
       const globalIdx = startIndex + idx;
       const displayNumber = userItems.length - globalIdx;
       const status = normalizeStatus(item.status);
+      const { canEdit, canComplete, canDelete } = getItemPermissions(status);
       const thumbUrl = getThumbnailUrl(item);
       const detailsHref = `${ITEM_DETAILS_URL}?id=${encodeURIComponent(item.id)}`;
       const editHref = `${ITEM_EDIT_URL}?id=${encodeURIComponent(item.id)}`;
-      const showCompleteBtn = status === "available" || status === "reserved";
       const safeTitle = escapeHtml(item.title || "Untitled Item");
 
       return `
@@ -245,20 +284,26 @@ function renderItems() {
           ${buildTagPills(item)}
 
           <div class="item-actions">
-            <a
-              href="${editHref}"
-              class="item-action-btn item-action-btn--edit"
-              title="Edit item"
-              aria-label="Edit item"
-            >
-              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              </svg>
-            </a>
+            ${
+              canEdit
+                ? `
+                  <a
+                    href="${editHref}"
+                    class="item-action-btn item-action-btn--edit"
+                    title="Edit item"
+                    aria-label="Edit item"
+                  >
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 20h9"></path>
+                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                    </svg>
+                  </a>
+                `
+                : ""
+            }
 
             ${
-              showCompleteBtn
+              canComplete
                 ? `
                   <button
                     type="button"
@@ -276,21 +321,27 @@ function renderItems() {
                 : ""
             }
 
-            <button
-              type="button"
-              class="item-action-btn item-action-btn--delete"
-              data-action="delete"
-              data-id="${escapeHtml(item.id)}"
-              title="Delete item"
-              aria-label="Delete item"
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                <path d="M10 11v6"></path>
-                <path d="M14 11v6"></path>
-              </svg>
-            </button>
+            ${
+              canDelete
+                ? `
+                  <button
+                    type="button"
+                    class="item-action-btn item-action-btn--delete"
+                    data-action="delete"
+                    data-id="${escapeHtml(item.id)}"
+                    title="Delete item"
+                    aria-label="Delete item"
+                  >
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                      <path d="M10 11v6"></path>
+                      <path d="M14 11v6"></path>
+                    </svg>
+                  </button>
+                `
+                : ""
+            }
           </div>
         </article>
       `;
@@ -322,9 +373,11 @@ async function updateItemStatus(itemId, nextStatus) {
   setPageError("");
 
   const normalized = normalizeStatus(nextStatus);
+  const dbStatus = formatStatusForDb(normalized);
+
   const { error } = await supabaseClient
     .from("items")
-    .update({ status: normalized })
+    .update({ status: dbStatus })
     .eq("id", itemId)
     .eq("donor_id", currentUser.id);
 
@@ -335,7 +388,7 @@ async function updateItemStatus(itemId, nextStatus) {
   }
 
   userItems = userItems.map((item) =>
-    String(item.id) === String(itemId) ? { ...item, status: normalized } : item
+    String(item.id) === String(itemId) ? { ...item, status: dbStatus } : item
   );
   renderItems();
 }

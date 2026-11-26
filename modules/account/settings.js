@@ -190,7 +190,7 @@ async function loadSettingsPage() {
 
   currentUser = session.user;
   if (publicProfileLink) {
-    publicProfileLink.href = `${PUBLIC_PROFILE_URL}?userId=${encodeURIComponent(currentUser.id)}`;
+    publicProfileLink.href = `${PUBLIC_PROFILE_URL}?id=${encodeURIComponent(currentUser.id)}`;
   }
 
   await ensureUserProfile(currentUser);
