@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post A New Item</title>
+
+  <!-- Styling -->
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="./item-post.css">
+</head>
+<body>
+  <main class="post-page">
+    <div class="post-panel">
+      <div class="post-header">
+        <h1 id="post-page-heading" class="post-heading">Post A New Item</h1>
+      </div>
+
+      <form id="item-post-form" class="post-card" novalidate>
+        <!-- Top Photo Upload Section -->
+        <section class="post-section post-photos-section" aria-label="Item photos">
+          <!-- Thumbnail slot -->
+          <div class="photo-slot-col">
+            <label class="photo-box" id="thumbnail-dropzone" for="thumbnail-input">
+              <input
+                type="file"
+                id="thumbnail-input"
+                accept="image/*"
+                class="sr-only-input"
+              >
+              <div class="photo-placeholder" id="thumbnail-placeholder">
+                <span class="photo-plus" aria-hidden="true">+</span>
+                <div class="photo-meta">
+                  <span class="photo-label">Add thumbnail</span>
+                  <span class="photo-hint">( max 10 MB )</span>
+                </div>
+              </div>
+              <img id="thumbnail-preview" class="photo-box-img is-hidden" alt="Thumbnail preview">
+              <button
+                type="button"
+                id="remove-thumbnail-btn"
+                class="photo-remove-circle is-hidden"
+                aria-label="Remove thumbnail"
+                title="Remove thumbnail"
+              >
+                <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+                  <line x1="3.5" y1="3.5" x2="10.5" y2="10.5"></line>
+                  <line x1="10.5" y1="3.5" x2="3.5" y2="10.5"></line>
+                </svg>
+              </button>
+            </label>
+            <small class="inline-error" id="thumbnail-error"></small>
+          </div>
+
+          <div class="photos-vertical-divider" aria-hidden="true"></div>
+
+          <!-- Extra photos horizontal scroll strip -->
+          <div class="extra-photos-col">
+            <div class="extra-photos-row" id="extra-photos-row">
+              <div id="extra-photos-list" class="extra-photos-list"></div>
+
+              <div class="photo-slot-col" id="extra-add-slot">
+                <label class="photo-box" id="extra-photos-dropzone" for="extra-photos-input">
+                  <input
+                    type="file"
+                    id="extra-photos-input"
+                    accept="image/*"
+                    multiple
+                    class="sr-only-input"
+                  >
+                  <div class="photo-placeholder">
+                    <span class="photo-plus" aria-hidden="true">+</span>
+                    <div class="photo-meta">
+                      <span class="photo-label">Add more photos</span>
+                      <span class="photo-hint">( up to 10 photos )</span>
+                      <span class="photo-hint">( max 10 MB each )</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+            <small class="inline-error" id="extra-photos-error"></small>
+          </div>
+        </section>
+
+        <!-- Middle Fields Section -->
+        <section class="post-section post-fields-section">
+          <div class="post-fields-left">
+            <div class="post-field-row">
+              <label for="item-title" class="post-field-label">Title</label>
+              <div class="post-field-control">
+                <input
+                  type="text"
+                  id="item-title"
+                  name="title"
+                  class="post-input"
+                  placeholder="Enter your item name here..."
+                  maxlength="120"
+                  required
+                >
+                <small class="inline-error" id="title-error"></small>
+              </div>
+            </div>
+
+            <div class="post-field-row post-field-row--top">
+              <label for="item-description" class="post-field-label post-field-label--desc">Description</label>
+              <div class="post-field-control">
+                <textarea
+                  id="item-description"
+                  name="description"
+                  class="post-textarea"
+                  placeholder="Enter your item description here..."
+                  maxlength="2000"
+                  rows="7"
+                ></textarea>
+                <small class="inline-error" id="description-error"></small>
+              </div>
+            </div>
+          </div>
+
+          <div class="post-fields-right">
+            <div class="post-field-row post-field-row--compact">
+              <label for="item-location" class="post-field-label">Location</label>
+              <div class="post-field-control location-combobox location-field-wrap">
+                <input
+                  type="text"
+                  id="item-location"
+                  name="location"
+                  class="post-input post-combobox-input post-location-input"
+                  placeholder="Select a location..."
+                  autocomplete="off"
+                >
+                <button
+                  type="button"
+                  id="item-location-arrow-btn"
+                  class="location-arrow-btn"
+                  aria-label="Toggle location list"
+                  tabindex="-1"
+                >
+                  <img
+                    src="/assets/images/icon-dropdown-arrow.png"
+                    alt=""
+                    class="location-arrow-icon"
+                    aria-hidden="true"
+                  >
+                </button>
+                <div id="item-location-menu" class="location-menu is-hidden" role="listbox"></div>
+                <small class="inline-error" id="location-error"></small>
+              </div>
+            </div>
+
+            <div class="post-field-row post-field-row--top post-field-row--compact">
+              <span class="post-field-label post-field-label--sm">Categories</span>
+              <div class="post-field-control categories-stack">
+                <div class="category-dropdown" data-category-dropdown="item_type">
+                  <button
+                    type="button"
+                    class="category-trigger"
+                    data-placeholder="Item Type..."
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                  >
+                    <span class="category-trigger-text">Item Type...</span>
+                    <img
+                      src="/assets/images/icon-dropdown-arrow.png"
+                      alt=""
+                      class="category-arrow-icon"
+                      aria-hidden="true"
+                    >
+                  </button>
+                  <div class="category-menu is-hidden" role="listbox"></div>
+                  <small class="inline-error" id="item-type-error"></small>
+                </div>
+
+                <div class="category-dropdown" data-category-dropdown="condition_type">
+                  <button
+                    type="button"
+                    class="category-trigger"
+                    data-placeholder="Condition..."
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                  >
+                    <span class="category-trigger-text">Condition...</span>
+                    <img
+                      src="/assets/images/icon-dropdown-arrow.png"
+                      alt=""
+                      class="category-arrow-icon"
+                      aria-hidden="true"
+                    >
+                  </button>
+                  <div class="category-menu is-hidden" role="listbox"></div>
+                  <small class="inline-error" id="condition-type-error"></small>
+                </div>
+
+                <div class="category-dropdown" data-category-dropdown="delivery_type">
+                  <button
+                    type="button"
+                    class="category-trigger"
+                    data-placeholder="Delivery Type..."
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                  >
+                    <span class="category-trigger-text">Delivery Type...</span>
+                    <img
+                      src="/assets/images/icon-dropdown-arrow.png"
+                      alt=""
+                      class="category-arrow-icon"
+                      aria-hidden="true"
+                    >
+                  </button>
+                  <div class="category-menu is-hidden" role="listbox"></div>
+                  <small class="inline-error" id="delivery-type-error"></small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Bottom Action Buttons -->
+        <footer class="post-actions-bar">
+          <small class="inline-error post-form-error" id="post-form-error"></small>
+
+          <div id="create-actions" class="post-actions-group">
+            <a href="./item-menu.html" class="post-btn post-btn--cancel">Cancel</a>
+            <button type="button" id="save-draft-btn" class="post-btn post-btn--draft">Save Draft</button>
+            <button type="submit" id="publish-item-btn" class="post-btn post-btn--submit">Post Item</button>
+          </div>
+
+          <div id="edit-actions" class="post-actions-group is-hidden">
+            <a href="./item-menu.html" class="post-btn post-btn--cancel">Cancel</a>
+            <button type="button" id="save-changes-btn" class="post-btn post-btn--submit">Save Changes</button>
+          </div>
+        </footer>
+      </form>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script type="module" src="/assets/js/script.js"></script>
+  <script type="module" src="./item-post.js"></script>
+</body>
+</html>
