@@ -105,8 +105,6 @@ const avatarHTML = (id) => {
     return `<span class="avatar">${url ? `<img src="${esc(url)}" alt="">` : esc(nameOf(id).charAt(0).toUpperCase())}</span>`;
 };
 
-const EYE_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>`;
-
 // 当前标签页的预约：received = 我是 donor；sent = 我是 recipient
 // Appointments of the current tab: received = I am the donor; sent = I am the recipient
 const scoped = () => appts.filter((a) => (view === "received" ? a.donor_id === me.id : a.recipient_id === me.id));
@@ -164,7 +162,8 @@ function renderTabs() {
     colWho.textContent = view === "received" ? "Requested by" : "Donor";
 }
 
-// 左边的预约列表 / The appointment list on the left
+// 左边的预约列表（点击整行就会在右边显示详情，所以没有 View 按钮）
+// The appointment list on the left (clicking a row shows its details, so there is no View button)
 function renderList() {
     renderTabs();
     const nums = numbering();
@@ -190,7 +189,6 @@ function renderList() {
             <span class="when"><strong>${fmtDate(a.date)}</strong><span>${fmtTime(a.time)}</span></span>
             <span class="where" title="${esc(a.location)}">${esc(a.location)}</span>
             <span class="badge st-${esc(a.status)}">${esc(STATUS_LABEL[a.status] || a.status)}</span>
-            <button type="button" class="eye" title="View details">${EYE_SVG}</button>
         </li>`;
     }).join("");
 }
@@ -214,31 +212,37 @@ function renderDetails() {
     const donorAccepted = isDonor && a.status === "accepted";
 
     // 按钮规则 / Button rules:
-    //  Accept   → donor + pending
-    //  Decline  → donor + pending
+    //  Accept / Decline → 只有捐赠者且 pending；显示在上面的“决定卡片”里，不在这个按钮栏
+    //                     donor + pending only; shown in the decision card near the top, not in this bar
     //  Complete → donor + accepted（只有捐赠者能完成 / only the donor can complete）
-    //  Edit     → pending 或 accepted / pending or accepted
+    //  Edit     → 只有预约的人（My bookings），捐赠者（Requests to me）没有 / only the person who booked (My bookings); the donor (Requests to me) has none
     //  Cancel   → 其他还能操作的情况 / every other actionable case
     const buttons = [
-        pendingForDonor ? `<button type="button" class="btn btn-primary" data-act="accept">✓ Accept</button>` : "",
         donorAccepted   ? `<button type="button" class="btn btn-primary" data-act="complete">✓ Complete</button>` : "",
-        active          ? `<button type="button" class="btn btn-gray" data-act="edit">✎ Edit</button>` : "",
-        pendingForDonor ? `<button type="button" class="btn btn-danger" data-act="decline">✕ Decline</button>` : "",
+        active && !isDonor ? `<button type="button" class="btn btn-gray" data-act="edit">✎ Edit</button>` : "",
         active && !pendingForDonor ? `<button type="button" class="btn btn-danger" data-act="cancel">✕ Cancel</button>` : "",
     ].join("");
 
     const note =
-        pendingForDonor          ? `<p class="d-note is-action"><strong>${esc(nameOf(a.recipient_id))}</strong> would like to pick up these items at the time and place below. Please accept or decline.</p>` :
+        // 我是捐赠者、对方在等我批准：显示大大的 同意 / 不同意 按钮
+        // I am the donor and the other person is waiting for my approval: show big Accept / Decline buttons
+        pendingForDonor          ? `<div class="d-decision">
+                <p><strong>${esc(nameOf(a.recipient_id))}</strong> would like to pick up these items at the time and place below. Do you approve?</p>
+                <div class="d-decision-btns">
+                    <button type="button" class="btn btn-primary btn-lg" data-act="accept">✓ Accept</button>
+                    <button type="button" class="btn btn-danger btn-lg" data-act="decline">✕ Decline</button>
+                </div>
+            </div>` :
         donorAccepted            ? `<p class="d-note is-action">You accepted this request. After the pickup, mark it <strong>Complete</strong> — or <strong>Cancel</strong> if it can't go ahead.</p>` :
-        a.status === "pending"   ? `<p class="d-note">Waiting for the donor to accept this appointment.</p>` :
-        a.status === "accepted"  ? `<p class="d-note">Accepted. The donor will mark it completed after the pickup.</p>` :
+        a.status === "pending"   ? `<p class="d-note">Waiting for <strong>${esc(nameOf(a.donor_id))}</strong> to approve this appointment.</p>` :
+        a.status === "accepted"  ? `<p class="d-note"><strong>${esc(nameOf(a.donor_id))}</strong> approved this appointment. They will mark it completed after the pickup.</p>` :
         a.status === "completed" ? `<p class="d-note">This appointment is completed. 🎉</p>` :
         a.status === "cancelled" ? `<p class="d-note">This appointment was declined or cancelled.</p>` : "";
 
     detailsEl.innerHTML = `
         <div class="d-hero st-${esc(a.status)}">
             <div class="d-hero-top">
-                <span class="d-hero-no">Appointment #${nums.get(a.id)}</span>
+                <span class="d-hero-no">Appointment ${nums.get(a.id)}</span>
                 <span class="d-hero-status">${esc(STATUS_LABEL[a.status] || a.status)}</span>
             </div>
             <div class="d-hero-when">
@@ -272,11 +276,11 @@ function renderDetails() {
         <section class="d-card">
             <h3 class="sec-title">Pickup Location</h3>
             <p class="loc-line">📍 ${esc(a.location)}</p>
-            <!-- 地图：用 Google 地图嵌入，不需要 API key；点击在新标签页打开 -->
-            <!-- Map: Google Maps embed (no API key); click opens it in a new tab -->
+            <!-- 地图：用 Google 地图嵌入，不需要 API key；点击地图在新标签页打开（没有文字提示） -->
+            <!-- Map: Google Maps embed (no API key); clicking the map opens it in a new tab (no text label) -->
             <div class="map-box">
                 <iframe src="https://maps.google.com/maps?q=${mapQ}&z=15&output=embed" loading="lazy" tabindex="-1" title="Map"></iframe>
-                <a href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener"><span>Click to view in Maps</span></a>
+                <a href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" aria-label="Open in Google Maps"></a>
             </div>
         </section>
 
@@ -533,9 +537,9 @@ async function init() {
     await loadAppointments();
 
     // 网址参数 / URL parameters:
-    //   Appointments.html?id=<预约id>                  直接打开某个预约的详情 / open an appointment's details
-    //   Appointments.html?donor=<用户id>&item=<物品id>  打开“Book a pickup”弹窗并预选 / open the "Book a pickup" modal, preselected
-    //   Appointments.html?item=<物品id>                只给物品，自动找出它的捐赠者 / item only: find its donor automatically
+    //   appointments.html?id=<预约id>                  直接打开某个预约的详情 / open an appointment's details
+    //   appointments.html?donor=<用户id>&item=<物品id>  打开“Book a pickup”弹窗并预选 / open the "Book a pickup" modal, preselected
+    //   appointments.html?item=<物品id>                只给物品，自动找出它的捐赠者 / item only: find its donor automatically
     const params = new URLSearchParams(location.search);
     const idParam = params.get("id");
     let donorParam = params.get("donor");

@@ -32,21 +32,21 @@
                         <button type="button" class="tab" data-view="sent">My bookings</button>
                     </div>
 
-                    <!-- 表头 / Table header -->
+                    <!-- 表头（点击任意一行就会在右边显示详情，所以没有 View 栏）
+                         Table header (click any row to see its details on the right, so there is no View column) -->
                     <div class="appt-head">
                         <span>No.</span>
                         <span id="colWho">Requested by</span>
                         <span>Time &amp; Date</span>
                         <span>Location</span>
                         <span>Status</span>
-                        <span>View</span>
                     </div>
 
-                    <!-- 预约列表由 Appointments.js 生成 / The list is rendered by Appointments.js -->
+                    <!-- 预约列表由 appointments.js 生成 / The list is rendered by appointments.js -->
                     <ul id="apptList" class="appt-list"></ul>
                 </section>
 
-                <!-- 右边：预约详情（由 Appointments.js 生成） / Right: appointment details (rendered by Appointments.js) -->
+                <!-- 右边：预约详情（由 appointments.js 生成） / Right: appointment details (rendered by appointments.js) -->
                 <aside class="appt-details" id="details"></aside>
             </section>
         </main>
