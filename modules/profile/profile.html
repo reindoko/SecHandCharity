@@ -8,9 +8,26 @@
   <link rel="stylesheet" href="/assets/css/style.css">
   <link rel="stylesheet" href="/assets/css/sidebar.css">
   <link rel="stylesheet" href="./profile.css">
+  <style>
+    .profile-back-button {
+      gap: 8px;
+      margin-top: 16px;
+      margin-bottom: 16px;
+    }
+
+    .profile-back-button img {
+      width: 16px;
+      height: 16px;
+    }
+  </style>
 </head>
 <body>
   <div class="profile-page">
+    <button id="profile-back" class="secondary-button profile-back-button" type="button">
+      <img src="/assets/images/icon-back-arrow.png" alt="">
+      Back
+    </button>
+
     <div id="page-status" class="profile-state" role="status" aria-live="polite">
       Loading profile...
     </div>
@@ -64,7 +81,12 @@
             No published donations are publicly available to show.
           </div>
           <div id="activity-list" class="activity-grid"></div>
-          <button id="activity-more" class="secondary-button" type="button" hidden>View More</button>
+          <button id="activity-retry" class="secondary-button" type="button" hidden>Retry</button>
+          <nav id="activity-pagination" class="activity-pagination" aria-label="Recent donation pages" hidden>
+            <button id="activity-previous" class="secondary-button" type="button" hidden>Back</button>
+            <span id="activity-page-indicator" class="activity-page-indicator" aria-live="polite">Page 1 of 1</span>
+            <button id="activity-next" class="secondary-button" type="button" hidden>Next</button>
+          </nav>
         </section>
 
         <section class="profile-section reviews-section" aria-labelledby="reviews-heading">
@@ -104,5 +126,16 @@
   <script type="module" src="/assets/js/sidebar.js"></script>
   <script type="module" src="/assets/js/script.js"></script>
   <script type="module" src="./profile.js"></script>
+  <script>
+    document.getElementById("profile-back").addEventListener("click", () => {
+      const previousPage = document.referrer ? new URL(document.referrer) : null;
+      if (previousPage && previousPage.origin === window.location.origin && window.history.length > 1) {
+        window.history.back();
+        return;
+      }
+
+      window.location.assign("/modules/catalogue/catalogue.html");
+    });
+  </script>
 </body>
 </html>

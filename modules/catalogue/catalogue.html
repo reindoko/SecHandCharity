@@ -111,7 +111,6 @@
               </svg>
             </span>
             <span class="category-name">Others</span>
-            <span class="category-count" data-count-for="others">0 items</span>
           </button>
         </div>
 
@@ -285,6 +284,11 @@
         </div>
 
         <div class="donation-grid" id="donation-grid" aria-live="polite" aria-busy="false"></div>
+        <nav class="donation-pagination" id="donation-pagination" aria-label="Donation item pages" hidden>
+          <button class="search-button" id="donation-previous-page" type="button">Back</button>
+          <p class="donation-page-indicator" id="donation-page-indicator" aria-live="polite">Page 1 of 1</p>
+          <button class="search-button" id="donation-next-page" type="button">Next</button>
+        </nav>
       </section>
 
       <footer class="catalogue-footer">
