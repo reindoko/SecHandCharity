@@ -37,7 +37,7 @@ const SIDEBAR_TABS = [
   {
     key: "saved",
     label: "Saved Items",
-    href: "/modules/saved/saved-items.html",
+    href: "/modules/saved/saved.html",
     icon: `${IMAGE_PATH}/icon-saved.png`,
   },
   {
