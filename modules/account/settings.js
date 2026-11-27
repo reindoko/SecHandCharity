@@ -130,6 +130,47 @@ function renderStars(rating) {
   return "★".repeat(filled) + "☆".repeat(Math.max(0, 5 - filled));
 }
 
+async function loadProfileStats(userId) {
+  const [reviewsRes, itemsRes] = await Promise.all([
+    supabaseClient
+      .from("reviews")
+      .select("star_rating")
+      .eq("reviewed_user_id", userId),
+    supabaseClient
+      .from("items")
+      .select("id, status")
+      .eq("donor_id", userId),
+  ]);
+
+  if (reviewsRes.error) {
+    console.warn("Reviews query error:", reviewsRes.error.message);
+  }
+  if (itemsRes.error) {
+    console.warn("Items query error:", itemsRes.error.message);
+  }
+
+  const reviews = !reviewsRes.error && Array.isArray(reviewsRes.data) ? reviewsRes.data : [];
+  const items = !itemsRes.error && Array.isArray(itemsRes.data) ? itemsRes.data : [];
+
+  const reviewCount = reviews.length;
+  const ratingAvg =
+    reviewCount > 0
+      ? reviews.reduce((sum, r) => sum + (Number(r.star_rating) || 0), 0) / reviewCount
+      : 0;
+
+  const itemsPosted = items.length;
+  const itemsDonated = items.filter(
+    (item) => String(item.status || "").trim().toLowerCase() === "completed"
+  ).length;
+
+  return {
+    ratingAvg,
+    reviewCount,
+    itemsPosted,
+    itemsDonated,
+  };
+}
+
 function openLocationDropdown() {
   if (!locationSearchInput || !locationMenu) return;
   locationSearchInput.removeAttribute("readonly");
@@ -219,12 +260,12 @@ async function loadSettingsPage() {
     avatarImg.src = profile.avatar_url;
   }
 
-  const rating = Number(profile.rating_avg || 0);
-  document.getElementById("profile-rating").textContent = rating.toFixed(1);
-  document.getElementById("profile-rating-stars").textContent = renderStars(rating);
-  document.getElementById("profile-reviews").textContent = profile.review_count ?? 0;
-  document.getElementById("profile-donated").textContent = profile.items_donated ?? 0;
-  document.getElementById("profile-posted").textContent = profile.items_posted ?? 0;
+  const stats = await loadProfileStats(currentUser.id);
+  document.getElementById("profile-rating").textContent = stats.ratingAvg.toFixed(1);
+  document.getElementById("profile-rating-stars").textContent = renderStars(stats.ratingAvg);
+  document.getElementById("profile-reviews").textContent = stats.reviewCount;
+  document.getElementById("profile-donated").textContent = stats.itemsDonated;
+  document.getElementById("profile-posted").textContent = stats.itemsPosted;
   document.getElementById("profile-age").textContent = formatAccountAge(
     profile.created_at || currentUser.created_at
   );

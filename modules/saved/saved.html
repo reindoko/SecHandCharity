@@ -4,47 +4,55 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Saved Items | SecHandCharity</title>
-  <link rel="stylesheet" href="../../assets/css/style.css">
-  <link rel="stylesheet" href="saved.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+  <link rel="stylesheet" href="./saved.css">
 </head>
 <body>
-  <main class="saved-page">
-    <header class="saved-header">
-      <div>
-        <p class="eyebrow">Your collection</p>
-        <h1>Saved Items</h1>
-      </div>
-      <button class="primary-button" id="create-category-button" type="button">Create Category</button>
-    </header>
+  <div class="app-layout">
+    <aside id="sidebar"></aside>
 
-    <section class="wishlist-section" aria-labelledby="wishlist-heading">
-      <div>
-        <p class="eyebrow">Favourite search terms</p>
-        <h2 id="wishlist-heading">Wishlist Keywords</h2>
-      </div>
-      <form class="keyword-form" id="keyword-form">
-        <label for="keyword-input">Add keyword</label>
-        <input id="keyword-input" type="text" maxlength="40" placeholder="e.g. laptop">
-        <button class="primary-button" type="submit">Add</button>
-      </form>
-      <div class="keyword-list" id="keyword-list"></div>
-    </section>
+    <main class="main-content">
+      <div class="saved-page">
+        <header class="saved-header">
+          <div>
+            <p class="eyebrow">Your collection of</p>
+            <h1>Saved Items</h1>
+          </div>
+        </header>
 
-    <section class="categories-section" aria-labelledby="categories-heading">
-      <div class="section-heading">
-        <h2 id="categories-heading">Categories</h2>
-      </div>
-      <div class="category-grid" id="category-grid"></div>
-    </section>
+        <section class="wishlist-section" aria-labelledby="wishlist-heading">
+          <div>
+            <p class="eyebrow">Favourite search terms</p>
+            <h2 id="wishlist-heading">Wishlist Keywords</h2>
+          </div>
+          <form class="keyword-form" id="keyword-form">
+            <label for="keyword-input">Add keyword</label>
+            <input id="keyword-input" type="text" maxlength="40" placeholder="e.g. laptop">
+            <button class="primary-button" type="submit">Add</button>
+          </form>
+          <div class="keyword-list" id="keyword-list"></div>
+        </section>
 
-    <section aria-labelledby="saved-items-heading">
-      <div class="section-heading">
-        <h2 id="saved-items-heading">Items</h2>
-        <p id="active-category-label">All saved items</p>
+        <section class="categories-section" aria-labelledby="categories-heading">
+          <div class="section-heading">
+            <h2 id="categories-heading">Categories</h2>
+            <button class="primary-button" id="create-category-button" type="button">Create Category</button>
+          </div>
+          <div class="category-grid" id="category-grid"></div>
+        </section>
+
+        <section aria-labelledby="saved-items-heading">
+          <div class="section-heading">
+            <h2 id="saved-items-heading">Items</h2>
+            <p id="active-category-label">All saved items</p>
+          </div>
+          <div class="saved-grid" id="saved-grid"></div>
+          <nav class="saved-pagination is-hidden" id="saved-pagination" aria-label="Saved items pages"></nav>
+        </section>
       </div>
-      <div class="saved-grid" id="saved-grid"></div>
-    </section>
-  </main>
+    </main>
+  </div>
 
   <dialog id="category-dialog">
     <form id="category-form">
@@ -77,6 +85,8 @@
   </dialog>
 
   <div class="status-message" id="status-message" role="status" aria-live="polite"></div>
-  <script type="module" src="saved.js"></script>
+  <script type="module" src="/assets/js/sidebar.js"></script>
+  <script type="module" src="/assets/js/script.js"></script>
+  <script type="module" src="./saved.js"></script>
 </body>
 </html>

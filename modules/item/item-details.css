@@ -24,20 +24,25 @@
 }
 
 .return-link-btn {
-  all: unset;
-  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid rgba(31, 41, 32, 0.18);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.84);
   font-family: inherit;
-  font-size: 0.98rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: #181c18;
   cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .return-link-btn:hover {
-  color: #2b562b;
+  background: #e2ede0;
+  border-color: #45b039;
+  color: #276921;
 }
 
 .return-arrow-icon {
@@ -503,6 +508,10 @@
   gap: 18px;
 }
 
+.reviews-list .review-item:nth-child(n + 4) {
+  display: none;
+}
+
 .review-item {
   display: flex;
   align-items: flex-start;
@@ -570,7 +579,16 @@
 }
 
 .reviews-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
   padding-top: 2px;
+}
+
+.reviews-more-prompt {
+  font-size: 0.9rem;
+  color: #4f554f;
 }
 
 .read-all-reviews-link {
@@ -578,7 +596,7 @@
   align-items: center;
   gap: 6px;
   font-size: 0.92rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #2f7a38;
   text-decoration: none;
 }

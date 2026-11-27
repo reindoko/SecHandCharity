@@ -4,6 +4,7 @@ const LOGIN_PAGE_URL = "/modules/account/login.html";
 const PROFILE_PAGE_URL = "/modules/profile/profile.html";
 const MESSAGING_PAGE_URL = "/modules/messaging/msg.html";
 const CART_PAGE_URL = "/modules/cart/cart.html";
+const MAX_PREVIEW_REVIEWS = 3;
 
 const returnBtnEl = document.getElementById("return-btn");
 const feedbackEl = document.getElementById("details-feedback");
@@ -265,14 +266,13 @@ async function loadDonorAndReviews(donorId) {
     .from("reviews")
     .select("*")
     .eq("reviewed_user_id", donorId)
-    .order("created_at", { ascending: false })
-    .limit(5);
+    .order("created_at", { ascending: false });
 
-  const reviewRows = !reviewsError && Array.isArray(reviewsData) ? reviewsData : [];
-  const totalCount = reviewRows.length;
+  const allReviews = !reviewsError && Array.isArray(reviewsData) ? reviewsData : [];
+  const totalCount = allReviews.length;
   const avgScore =
     totalCount > 0
-      ? reviewRows.reduce((sum, r) => sum + (Number(r.star_rating) || 0), 0) / totalCount
+      ? allReviews.reduce((sum, r) => sum + (Number(r.star_rating) || 0), 0) / totalCount
       : 0;
 
   const formattedAvg = avgScore.toFixed(1);
@@ -289,12 +289,14 @@ async function loadDonorAndReviews(donorId) {
 
   if (!reviewsListEl) return;
 
-  if (reviewRows.length === 0) {
+  const visibleReviews = allReviews.slice(0, MAX_PREVIEW_REVIEWS);
+
+  if (visibleReviews.length === 0) {
     reviewsListEl.innerHTML = `<p class="reviews-empty">No reviews yet.</p>`;
     return;
   }
 
-  const reviewerIds = [...new Set(reviewRows.map((r) => r.reviewer_id).filter(Boolean))];
+  const reviewerIds = [...new Set(visibleReviews.map((r) => r.reviewer_id).filter(Boolean))];
   let reviewerMap = new Map();
 
   if (reviewerIds.length > 0) {
@@ -308,7 +310,7 @@ async function loadDonorAndReviews(donorId) {
     }
   }
 
-  reviewsListEl.innerHTML = reviewRows
+  reviewsListEl.innerHTML = visibleReviews
     .map((rev) => {
       const reviewerProfile = rev.reviewer_id ? reviewerMap.get(rev.reviewer_id) : null;
       const reviewerName =

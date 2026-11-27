@@ -5,58 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shopping Cart | SecHandCharity</title>
 
-  <link rel="stylesheet" href="/assets/css/sidebar.css">
   <link rel="stylesheet" href="../../assets/css/style.css">
   <link rel="stylesheet" href="cart.css">
 </head>
 <body>
-    <!-- Remove this whole <div> if you don't need the sidebar on this page -->
-  <div class="app-layout">
-    <aside id="sidebar"></aside>
-    <main class="main-content">
-      <main class="cart-page">
-    <section class="cart-catalog" aria-labelledby="catalogue-heading">
-      <div class="page-heading">
-        <div>
-          <p class="eyebrow">Browse donations</p>
-          <h1 id="catalogue-heading">Shopping Cart</h1>
+  <div class="cart-shell">
+    <main class="cart-page">
+      <section class="cart-catalog" aria-labelledby="catalogue-heading">
+        <div class="top-nav-row">
+          <button class="back-link-btn" id="back-button" type="button">
+            <img src="/assets/images/icon-back-arrow.png" alt="" aria-hidden="true">
+            <span>Return to previous page</span>
+          </button>
         </div>
-        <button class="secondary-button" id="open-cart-button" type="button">
-          Cart (<span id="cart-count">0</span>)
-        </button>
-      </div>
 
-      <div class="search-row">
-        <label for="cart-search">Search items</label>
-        <input id="cart-search" type="search" placeholder="Search title or location">
-      </div>
+        <div class="page-heading">
+          <div class="heading-title-row">
+            <div>
+              <p class="eyebrow">Browse donations</p>
+              <h1 id="catalogue-heading">Shopping Cart</h1>
+            </div>
+            <span class="cart-count-badge" id="open-cart-button" aria-live="polite">
+              Cart (<span id="cart-count">0</span>)
+            </span>
+          </div>
+        </div>
 
-      <div class="item-grid" id="item-grid"></div>
-    </section>
+        <div class="search-row">
+          <label for="cart-search">Search items</label>
+          <input id="cart-search" type="search" placeholder="Search title or location">
+        </div>
 
-    <aside class="cart-sidebar" id="cart-sidebar" aria-label="Selected cart items">
-      <div class="cart-sidebar-header">
-        <h2>Shopping Cart</h2>
-        <button class="icon-button" id="close-cart-button" type="button" aria-label="Close cart">×</button>
-      </div>
-      <div class="cart-items" id="cart-items"></div>
-      <div class="cart-footer">
-        <button class="danger-button" id="cancel-all-button" type="button">Cancel All</button>
-        <button class="primary-button" id="continue-button" type="button">Continue</button>
-      </div>
-    </aside>
-  </main>
-  </main>
+        <div class="item-grid" id="item-grid">
+          <p class="empty-state" id="items-loading">Loading items...</p>
+        </div>
+        <nav class="cart-pagination is-hidden" id="cart-pagination" aria-label="Cart items pages"></nav>
+      </section>
+
+      <aside class="cart-sidebar" id="cart-sidebar" aria-label="Selected checkout items">
+        <div class="cart-sidebar-header">
+          <h2>Checkout</h2>
+        </div>
+        <div class="cart-items" id="cart-items"></div>
+        <div class="cart-footer">
+          <button class="danger-button" id="cancel-all-button" type="button">Remove All</button>
+          <button class="primary-button" id="continue-button" type="button">Continue</button>
+        </div>
+      </aside>
+    </main>
   </div>
 
   <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
   <div class="status-message" id="status-message" role="status" aria-live="polite"></div>
 
+  <script type="module" src="/assets/js/script.js"></script>
   <script type="module" src="cart.js"></script>
-   <script type="module" src="/assets/js/sidebar.js"></script>
 </body>
 </html>
-      
-    
-
-  
