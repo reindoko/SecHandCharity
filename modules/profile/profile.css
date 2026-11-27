@@ -104,6 +104,10 @@
   transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
 }
 
+.profile-message-button[hidden] {
+  display: none;
+}
+
 .profile-message-button,
 .primary-button {
   background: #238644;
@@ -333,31 +337,33 @@
   white-space: pre-wrap;
 }
 
-.review-actions,
 .review-form-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 14px;
   margin-top: 12px;
 }
 
-.review-actions button {
-  padding: 6px 10px;
-  border: 1px solid #d5dfd5;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #315a35;
-  font: inherit;
-  font-size: 0.82rem;
-  cursor: pointer;
+.review-delete-row {
+  display: flex;
+  justify-content: flex-end;
 }
 
-.review-actions button:hover {
-  background: #f2f8f2;
+.review-delete-row .delete-review {
+  border-color: #e2a2a2;
+  background: #fff0f0;
+  color: #8f1d1d;
 }
 
-.review-actions .delete-review {
-  color: #9c2f2f;
+#review-submit[hidden],
+#review-cancel[hidden],
+#review-delete[hidden] {
+  display: none;
+}
+
+.review-delete-row .delete-review:hover:not(:disabled) {
+  border-color: #c45a5a;
+  background: #fde2e2;
 }
 
 .review-form {
@@ -396,7 +402,11 @@
 }
 
 .review-form textarea {
-  resize: vertical;
+  height: 120px;
+  min-height: 120px;
+  max-height: 120px;
+  overflow-y: auto;
+  resize: none;
 }
 
 .review-form select:focus,
