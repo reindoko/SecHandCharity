@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Posted Items</title>
+
+  <!-- Styling -->
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+  <link rel="stylesheet" href="./item-menu.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside id="sidebar"></aside>
+    <main class="main-content">
+      <div class="items-panel">
+        <div class="items-header">
+          <h2 class="items-title">Posted Items</h2>
+          <a href="./item-post.html" id="new-item-btn" class="new-item-btn">+ New Item</a>
+        </div>
+
+        <div class="items-status-bar">
+          <small class="field-error" id="items-page-error"></small>
+        </div>
+
+        <div class="items-container-box">
+          <div id="items-list" class="items-list">
+            <p class="items-empty-state" id="items-loading">Loading your items...</p>
+          </div>
+          <nav id="items-pagination" class="items-pagination is-hidden" aria-label="Posted items pages"></nav>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="/assets/js/sidebar.js"></script>
+  <script type="module" src="/assets/js/script.js"></script>
+  <script type="module" src="./item-menu.js"></script>
+</body>
+</html>

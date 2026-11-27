@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Item Details</title>
+
+  <!-- Styling -->
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="./item-details.css">
+</head>
+<body>
+  <main class="details-page">
+    <div class="details-panel">
+      <div class="details-top-bar">
+        <button type="button" id="return-btn" class="return-link-btn">
+          <img
+            src="/assets/images/icon-back-arrow.png"
+            alt=""
+            class="return-arrow-icon"
+            aria-hidden="true"
+          >
+          <span>Return to previous page</span>
+        </button>
+        <small class="details-feedback" id="details-feedback"></small>
+      </div>
+
+      <article id="item-details-card" class="details-card">
+        <!-- Photo Gallery Strip (Thumbnail first, then extra photos) -->
+        <section class="details-photos-section" aria-label="Item photos">
+          <div id="photos-strip" class="photos-strip"></div>
+        </section>
+
+        <!-- Main Body: Left Info + Description, Right Donor Card -->
+        <section class="details-main-grid">
+          <div class="details-info-col">
+            <div class="item-title-row">
+              <h1 id="item-title" class="item-title">Loading item...</h1>
+              <span id="item-status-badge" class="status-badge">Available</span>
+            </div>
+
+            <div class="item-meta-row">
+              <div class="item-location-row">
+                <span class="location-pin" aria-hidden="true">&#128205;</span>
+                <span id="item-location" class="item-location-text"></span>
+              </div>
+              <span id="item-posted-time" class="item-posted-time"></span>
+            </div>
+
+            <div id="item-category-pills" class="category-pills-row"></div>
+
+            <div class="details-divider"></div>
+
+            <div class="item-description-block">
+              <h2 class="section-subheading">Description</h2>
+              <div id="item-description" class="item-description-box"></div>
+            </div>
+          </div>
+
+          <aside class="donor-sidebar-col" aria-label="Donor details">
+            <div class="donor-card">
+              <a
+                id="donor-profile-link"
+                href="/modules/profile/profile.html"
+                class="donor-profile-trigger"
+                aria-label="View donor profile"
+                title="View donor profile"
+              >
+                <div class="donor-header">
+                  <div id="donor-avatar" class="donor-avatar" aria-hidden="true">?</div>
+
+                  <div class="donor-identity">
+                    <div id="donor-name" class="donor-name">Loading donor...</div>
+                    <div class="donor-rating-row">
+                      <span id="donor-rating-score" class="donor-rating-score">0.0</span>
+                      <span id="donor-rating-stars" class="rating-stars" aria-hidden="true">&#9734;&#9734;&#9734;&#9734;&#9734;</span>
+                      <span id="donor-rating-count" class="donor-rating-count">(0)</span>
+                    </div>
+                  </div>
+
+                  <span class="donor-external-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 3.5H16.5V8"></path>
+                      <path d="M16.5 3.5L9.5 10.5"></path>
+                      <path d="M8.5 5H5C4.44772 5 4 5.44772 4 6V15C4 15.5523 4.44772 16 5 16H14C14.5523 16 15 15.5523 15 15V11.5"></path>
+                    </svg>
+                  </span>
+                </div>
+              </a>
+
+              <div class="donor-actions">
+                <button type="button" id="message-donor-btn" class="donor-action-btn donor-action-btn--message">
+                  <span>Message Donor</span>
+                  <span aria-hidden="true">&#128172;</span>
+                </button>
+
+                <button type="button" id="add-to-cart-btn" class="donor-action-btn donor-action-btn--cart">
+                  <span id="cart-btn-label">Add To Shopping Cart</span>
+                  <span aria-hidden="true">&#128722;</span>
+                </button>
+
+                <button type="button" id="favourite-btn" class="donor-action-btn donor-action-btn--favourite" aria-pressed="false">
+                  <span id="favourite-btn-label">Save To Favourites</span>
+                  <span id="favourite-btn-heart" aria-hidden="true">&#9825;</span>
+                </button>
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <!-- Reviews Section -->
+        <section class="details-reviews-section" aria-label="Donor reviews">
+          <div class="details-divider"></div>
+
+          <div class="reviews-header">
+            <h2 id="reviews-heading" class="section-subheading">Reviews</h2>
+            <div class="donor-rating-row">
+              <span id="reviews-rating-score" class="donor-rating-score">0.0</span>
+              <span id="reviews-rating-stars" class="rating-stars" aria-hidden="true">&#9734;&#9734;&#9734;&#9734;&#9734;</span>
+              <span id="reviews-rating-count" class="donor-rating-count">(0)</span>
+            </div>
+          </div>
+
+          <div id="reviews-list" class="reviews-list"></div>
+
+          <div class="reviews-footer">
+            <a id="read-all-reviews-link" href="/modules/profile/profile.html" class="read-all-reviews-link">
+              <span>Read all reviews</span>
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9.5 3H13V6.5"></path>
+                <path d="M13 3L7.5 8.5"></path>
+                <path d="M6.5 4H4C3.44772 4 3 4.44772 3 5V12C3 12.5523 3.44772 13 4 13H11C11.5523 13 12 12.5523 12 12V9.5"></path>
+              </svg>
+            </a>
+          </div>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <!-- Lightbox Modal for clicking photos -->
+  <div id="photo-lightbox" class="photo-lightbox is-hidden" role="dialog" aria-modal="true" aria-label="Enlarged photo view">
+    <button type="button" id="lightbox-close-btn" class="lightbox-close-btn" aria-label="Close photo preview">&times;</button>
+    <img id="lightbox-img" class="lightbox-img" alt="Enlarged item photo">
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="/assets/js/script.js"></script>
+  <script type="module" src="./item-details.js"></script>
+</body>
+</html>

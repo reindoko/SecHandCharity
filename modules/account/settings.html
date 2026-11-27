@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings</title>
+
+  <!-- Styling -->
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/sidebar.css">
+  <link rel="stylesheet" href="./settings.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside id="sidebar"></aside>
+    <main class="main-content">
+      <div class="settings-panel">
+        <!-- 1. Settings -->
+        <section class="settings-block">
+          <h2 class="settings-title">Settings</h2>
+
+          <div class="settings-box settings-account-grid">
+            <div class="settings-avatar-card">
+              <div class="settings-avatar-frame">
+                <img id="settings-avatar" src="/assets/images/icon-account.png" alt="User avatar">
+              </div>
+              <input type="file" id="settings-avatar-file" accept="image/*" hidden>
+              <button type="button" id="change-avatar-btn" class="settings-btn-green">Change Photo</button>
+            </div>
+
+            <div class="settings-col-fields">
+              <div class="settings-row">
+                <label for="settings-username">Username</label>
+                <div class="settings-pill-wrap">
+                  <input id="settings-username" class="settings-pill-input" type="text" readonly>
+                  <button type="button" class="edit-icon-btn" data-field="username" aria-label="Edit username">
+                    <img src="/assets/images/icon-edit.png" alt="">
+                  </button>
+                </div>
+                <small class="field-error" id="settings-username-error"></small>
+              </div>
+
+              <div class="settings-row">
+                <label for="settings-email">Email</label>
+                <div class="settings-pill-wrap">
+                  <input
+                    id="settings-email"
+                    class="settings-pill-input settings-pill-input--locked"
+                    type="email"
+                    readonly
+                    tabindex="-1"
+                    aria-readonly="true"
+                  >
+                </div>
+                <small class="field-error" id="settings-email-error"></small>
+              </div>
+
+              <div class="settings-row">
+                <label for="settings-password">Password</label>
+                <div class="settings-pill-wrap">
+                  <input id="settings-password" class="settings-pill-input" type="password" value="••••••••••" readonly>
+                  <button type="button" id="change-password-btn" class="edit-icon-btn" aria-label="Change password">
+                    <img src="/assets/images/icon-edit.png" alt="">
+                  </button>
+                </div>
+                <small class="field-error" id="settings-password-error"></small>
+              </div>
+            </div>
+
+            <div class="settings-col-side">
+              <div class="settings-row">
+                <label for="settings-location-search">Location</label>
+                <div class="settings-pill-wrap location-combobox">
+                  <input
+                    id="settings-location-search"
+                    class="settings-pill-input has-dropdown-icon"
+                    type="text"
+                    placeholder="Location"
+                    autocomplete="off"
+                    readonly
+                  >
+                  <input id="settings-location" name="location" type="hidden">
+                  <button type="button" class="dropdown-icon-btn" data-field="location" aria-label="Select or edit location">
+                    <img src="/assets/images/icon-dropdown-arrow.png" alt="">
+                  </button>
+                  <div id="settings-location-menu" class="location-menu is-hidden" role="listbox"></div>
+                </div>
+                <small class="field-error" id="settings-location-error"></small>
+              </div>
+
+              <div class="privacy-banner">
+                <span class="privacy-info-icon" aria-hidden="true">i</span>
+                <span>Please do not disclose your personal information publicly to ensure safety.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-status-bar">
+            <small class="field-error" id="settings-form-error"></small>
+            <div class="settings-actions">
+              <button type="button" id="cancel-settings-btn" class="pill-action-btn pill-action-btn--secondary" hidden>Cancel</button>
+              <button type="button" id="save-settings-btn" class="pill-action-btn" hidden>Save Changes</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Public Profile -->
+        <section class="settings-block">
+          <h2 class="settings-title">
+            <a
+              href="/modules/profile/profile.html"
+              id="view-public-profile-link"
+              class="public-profile-link"
+              aria-label="Open public profile"
+            >
+              <span>Public Profile</span>
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </a>
+          </h2>
+
+          <div class="settings-box settings-stats-row">
+            <div class="stat-box">
+              <span class="stat-title">Rating :</span>
+              <div class="stat-metric">
+                <span id="profile-rating">0.0</span>
+                <span id="profile-rating-stars" class="stat-stars">☆☆☆☆☆</span>
+              </div>
+            </div>
+
+            <div class="stat-box">
+              <span class="stat-title">Reviews :</span>
+              <span id="profile-reviews" class="stat-metric">0</span>
+            </div>
+
+            <div class="stat-box">
+              <span class="stat-title">Items Donated :</span>
+              <span id="profile-donated" class="stat-metric">0</span>
+            </div>
+
+            <div class="stat-box">
+              <span class="stat-title">Items Posted :</span>
+              <span id="profile-posted" class="stat-metric">0</span>
+            </div>
+
+            <div class="stat-box">
+              <span class="stat-title">Account Age :</span>
+              <span id="profile-age" class="stat-metric">0 Days</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Restricted Zone -->
+        <section class="settings-block">
+          <h2 class="settings-title">Restricted Zone</h2>
+
+          <div class="settings-box settings-restricted-box">
+            <div class="restricted-item">
+              <button type="button" id="sign-out-btn" class="restricted-btn restricted-btn--neutral">Sign Out</button>
+              <span class="restricted-note restricted-note--neutral">You can sign back in anytime</span>
+            </div>
+
+            <div class="restricted-item">
+              <button type="button" id="delete-account-btn" class="restricted-btn restricted-btn--danger">Delete Account</button>
+              <span class="restricted-note restricted-note--danger">Data will not be recovered</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="/assets/js/sidebar.js"></script>
+  <script type="module" src="/assets/js/script.js"></script>
+  <script type="module" src="./settings.js"></script>
+</body>
+</html>
