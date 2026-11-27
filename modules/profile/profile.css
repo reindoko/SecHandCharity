@@ -339,17 +339,19 @@
 
 .review-form-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
   margin-top: 12px;
 }
 
-.review-delete-row {
+.review-form-primary-actions {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 14px;
 }
 
-.review-delete-row .delete-review {
+.review-form-actions .delete-review {
   border-color: #e2a2a2;
   background: #fff0f0;
   color: #8f1d1d;
@@ -361,7 +363,7 @@
   display: none;
 }
 
-.review-delete-row .delete-review:hover:not(:disabled) {
+.review-form-actions .delete-review:hover:not(:disabled) {
   border-color: #c45a5a;
   background: #fde2e2;
 }

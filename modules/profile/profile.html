@@ -112,12 +112,12 @@
             </select>
             <label for="review-comment">Your review</label>
             <textarea id="review-comment" name="comment" rows="4" required></textarea>
-            <div class="review-delete-row">
-              <button id="review-delete" class="secondary-button delete-review" type="button" hidden>Delete Review</button>
-            </div>
             <div class="review-form-actions">
-              <button id="review-submit" class="primary-button" type="submit">Post review</button>
-              <button id="review-cancel" class="secondary-button" type="button" hidden>Cancel changes</button>
+              <div class="review-form-primary-actions">
+                <button id="review-submit" class="primary-button" type="submit">Post review</button>
+                <button id="review-cancel" class="secondary-button" type="button" hidden>Cancel changes</button>
+              </div>
+              <button id="review-delete" class="secondary-button delete-review" type="button" hidden>Delete Review</button>
             </div>
             <p id="review-form-status" class="form-status" role="status" aria-live="polite"></p>
           </form>
