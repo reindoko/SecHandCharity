@@ -1,5 +1,5 @@
 /* =========================================================
-   消息页面样式（放大版） / Messaging page styles (larger version)
+   消息页面样式（放大版 + 与侧边栏对齐） / Messaging page styles (larger + aligned with the sidebar)
    包含图片附件样式 / Includes image-attachment styles
    侧边栏样式不在这里 / Sidebar styles are NOT in this file (see sidebar.css)
    ========================================================= */
@@ -24,21 +24,28 @@
     --shadow-md: 0 6px 20px rgba(20, 35, 25, .07);   /* 中阴影 / medium shadow */
 }
 
-/* ---------- 页面外框 / Page frame ---------- */
+/* ---------- 页面外框 / Page frame ----------
+   上下内边距 17px / 18px：让右边的顶边和底边对齐左边侧边栏卡片
+   Top / bottom padding of 17px / 18px lines the right side up with the sidebar card
+   如果还差几像素，只需微调这两个数字 / If it is still a few pixels off, just tweak these two numbers */
 .main-content {
     display: flex;
     flex-direction: column;       /* 标题在上，内容在下 / header on top, content below */
     height: 100vh;                /* 占满整个屏幕高度 / full viewport height */
     box-sizing: border-box;
-    padding: 0;
+    padding: 17px 28px 18px;      /* 上 / 左右 / 下 — top / sides / bottom */
+    gap: 16px;                    /* 标题卡片和聊天框之间的距离 / space between the title card and the panels */
     color: var(--ink);
 }
 
-/* 顶部 “Messages” 标题栏 / Top "Messages" title bar */
+/* 顶部 “Messages” 标题栏：现在是一张圆角卡片，和侧边栏、聊天框风格一致
+   Top "Messages" title bar: now a rounded card, matching the sidebar and chat panels */
 .msg-header {
-    padding: 18px 28px 14px;
+    padding: 14px 24px;
     background: var(--surface);
-    border-bottom: 1px solid var(--line);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
 }
 .msg-header h1 {
     margin: 0;
@@ -47,14 +54,15 @@
     letter-spacing: -0.01em;
 }
 
-/* 两栏布局：左边聊天列表 + 右边聊天内容 / Two columns: chat list (left) + chat (right) */
+/* 两栏布局：左边聊天列表 + 右边聊天内容 / Two columns: chat list (left) + chat (right)
+   内边距已经交给 .main-content，所以这里是 0 / Padding now comes from .main-content, so it is 0 here */
 .msg-layout {
     flex: 1;
     min-height: 0;                          /* 让内部可以滚动 / allow inner scrolling */
     display: grid;
     grid-template-columns: 360px 1fr;       /* 放大：左栏原 320px / larger: left column was 320px */
     gap: 20px;
-    padding: 20px 28px 24px;
+    padding: 0;
 }
 
 /* ---------- 共用卡片外观 / Shared card look ---------- */
@@ -430,6 +438,6 @@
 
 /* ---------- 小屏幕（手机） / Small screens (mobile) ---------- */
 @media (max-width: 800px) {
-    .msg-layout { grid-template-columns: 1fr; grid-template-rows: 200px 1fr; padding: 14px; gap: 14px; }  /* 上下排列 / stack vertically */
+    .msg-layout { grid-template-columns: 1fr; grid-template-rows: 200px 1fr; padding: 0; gap: 14px; }  /* 上下排列 / stack vertically */
     .msg { max-width: 85%; }
 }

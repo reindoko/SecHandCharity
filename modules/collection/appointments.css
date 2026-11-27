@@ -1,5 +1,5 @@
 /* =========================================================
-   预约页面样式 / Appointments page styles
+   预约页面样式（与侧边栏对齐） / Appointments page styles (aligned with the sidebar)
    风格与消息页面一致 / Same look as the messaging page
    侧边栏样式不在这里 / Sidebar styles are NOT in this file (see sidebar.css)
    ========================================================= */
@@ -32,24 +32,31 @@
 
 [hidden] { display: none !important; }   /* hidden 属性必须真正隐藏 / make [hidden] really hide */
 
-/* ---------- 页面外框 / Page frame ---------- */
+/* ---------- 页面外框 / Page frame ----------
+   上下内边距 17px / 18px：让右边的顶边和底边对齐左边侧边栏卡片
+   Top / bottom padding of 17px / 18px lines the right side up with the sidebar card
+   如果还差几像素，只需微调这两个数字 / If it is still a few pixels off, just tweak these two numbers */
 .main-content {
     display: flex;
     flex-direction: column;
     height: 100vh;
     box-sizing: border-box;
-    padding: 0;
+    padding: 17px 28px 18px;      /* 上 / 左右 / 下 — top / sides / bottom */
+    gap: 16px;                    /* 标题卡片和下面内容之间的距离 / space between the title card and the content */
     color: var(--ink);
 }
 
+/* 顶部标题栏：圆角卡片 / Top title bar: a rounded card */
 .appt-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 18px 28px 14px;
+    padding: 14px 24px;
     background: var(--surface);
-    border-bottom: 1px solid var(--line);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
 }
 .appt-header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; }
 
@@ -60,7 +67,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) 420px;
     gap: 20px;
-    padding: 20px 28px 24px;
+    padding: 0;
 }
 
 /* ---------- 共用卡片 / Shared card ---------- */
@@ -145,11 +152,11 @@
     text-align: center;
 }
 
-/* 表头和每一行共用同一组列宽 / Header and rows share the same columns */
+/* 表头和每一行共用同一组列宽（没有 View 栏） / Header and rows share the same columns (no View column) */
 .appt-head,
 .appt-row {
     display: grid;
-    grid-template-columns: 56px 1.3fr 1.2fr 1.5fr 120px 64px;
+    grid-template-columns: 56px 1.3fr 1.2fr 1.5fr 130px;
     gap: 12px;
     align-items: center;
 }
@@ -177,7 +184,7 @@
 }
 .list-empty { padding: 36px 16px; text-align: center; color: var(--ink-faint); font-size: 0.98rem; }
 
-/* 每一行预约 / One appointment row */
+/* 每一行预约（点击整行就会在右边显示详情） / One appointment row (click anywhere on it to see details) */
 .appt-row {
     padding: 14px 18px;
     background: var(--surface);
@@ -222,21 +229,6 @@
     font-weight: 600;
 }
 
-/* 眼睛按钮 / Eye (view) button */
-.eye {
-    width: 40px; height: 40px;
-    border: 0;
-    border-radius: 12px;
-    background: #d9dedc;
-    color: var(--ink);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color .15s;
-}
-.eye:hover, .appt-row.selected .eye { background: var(--green-800); color: #fff; }
-
 /* ---------- 右边：预约详情 / Right: appointment details ---------- */
 .appt-details {
     padding: 20px;
@@ -249,29 +241,34 @@
 .details-empty { margin: auto; text-align: center; color: var(--ink-faint); font-size: 1rem; }
 .details-empty::before { content: "📅"; display: block; font-size: 2.8rem; margin-bottom: 10px; opacity: .55; }
 
-/* 顶部大卡片：渐变色随状态变化 / Hero card: gradient follows the status colour */
+/* 顶部大卡片：实心白底 + 深色文字（清楚易读），左边的色条显示状态颜色
+   Hero card: solid white + dark text (easy to read); the coloured bar on the left shows the status */
 .d-hero {
     padding: 18px 20px;
     border-radius: 18px;
-    color: #fff;
-    background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 65%, #000));
-    box-shadow: 0 8px 20px color-mix(in srgb, var(--c) 35%, transparent);
+    background: #fff;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-left: 6px solid var(--c);
+    box-shadow: var(--shadow-md);
 }
 .d-hero-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.d-hero-no { font-weight: 700; font-size: 1.05rem; letter-spacing: -0.01em; }
-.d-hero-status {
+.d-hero-no { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.01em; color: var(--ink); }
+.d-hero-status {                                        /* 状态标签：浅底 + 深字 / status pill: light background + dark text */
     padding: 4px 14px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, .25);
+    background: var(--c-soft);
+    border: 1px solid var(--c);
+    color: var(--c-dark);
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: .03em;
     text-transform: uppercase;
 }
 .d-hero-when { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.d-hero-when .chip { padding: 10px 14px; border-radius: 14px; background: rgba(255, 255, 255, .18); }
-.d-hero-when small { display: block; font-size: 0.7rem; opacity: .85; text-transform: uppercase; letter-spacing: .05em; }
-.d-hero-when strong { font-size: 1.1rem; }
+.d-hero-when .chip { padding: 10px 14px; border-radius: 14px; background: var(--c-soft); }
+.d-hero-when small { display: block; font-size: 0.72rem; font-weight: 700; color: var(--c-dark); text-transform: uppercase; letter-spacing: .05em; }
+.d-hero-when strong { display: block; font-size: 1.15rem; color: var(--ink); }
 
 /* 分区卡片 / Section cards */
 .d-card {
@@ -306,7 +303,7 @@
     width: 40px; height: 40px;
     flex-shrink: 0;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--green-500), var(--green-800));
+    background: var(--green-800);
     color: #fff;
     font-weight: 700;
     display: flex; align-items: center; justify-content: center;
@@ -314,7 +311,8 @@
 }
 .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* 地点 + 地图 / Location + map */
+/* 地点 + 地图（点击地图会在新标签页打开 Google 地图，没有文字提示）
+   Location + map (clicking the map opens Google Maps in a new tab; no text label) */
 .loc-line { margin: 0 0 10px; font-weight: 600; font-size: 0.98rem; }
 .loc { font-size: 0.85rem; color: var(--ink-soft); margin: 0; }
 .map-box {
@@ -325,18 +323,8 @@
     border: 1px solid var(--line);
     background: var(--canvas);
 }
-.map-box iframe { width: 100%; height: 100%; border: 0; pointer-events: none; }   /* 点击由下面的链接处理 / clicks handled by the link below */
-.map-box a { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center; text-decoration: none; }
-.map-box a span {
-    margin-bottom: 8px;
-    padding: 3px 12px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, .92);
-    color: var(--ink);
-    font-size: 0.72rem;
-    font-weight: 600;
-    box-shadow: var(--shadow-sm);
-}
+.map-box iframe { width: 100%; height: 100%; border: 0; pointer-events: none; }   /* 点击由上面覆盖的链接处理 / clicks handled by the link laid over it */
+.map-box a { position: absolute; inset: 0; cursor: pointer; }
 
 /* 按钮区固定在底部 / Action bar sticks to the bottom */
 .d-actions {
@@ -350,6 +338,21 @@
     background: linear-gradient(to top, #fff 70%, rgba(255, 255, 255, 0));
 }
 .d-actions .btn { flex: 1 1 110px; }
+
+/* 决定卡片：别人等我批准时，显示大大的 Accept / Decline 按钮
+   Decision card: big Accept / Decline buttons when someone is waiting for my approval */
+.d-decision {
+    padding: 16px 18px;
+    background: #fff;
+    border: 1px solid #f0a030;
+    border-left: 6px solid #f0a030;
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+}
+.d-decision p { margin: 0 0 14px; font-size: 0.95rem; line-height: 1.45; color: var(--ink); }
+.d-decision-btns { display: flex; gap: 10px; }
+.d-decision-btns .btn { flex: 1; }
+.btn-lg { padding: 13px 22px; font-size: 1rem; }
 
 /* 提示条 / Notes */
 .d-note { margin: 0; padding: 12px 16px; border-radius: 14px; background: #fff8e1; border: 1px solid #f3e3a4; color: #7a6512; font-size: 0.88rem; line-height: 1.45; }
@@ -425,7 +428,7 @@
     .appt-details { min-height: 320px; }
 }
 @media (max-width: 720px) {
-    .appt-layout { padding: 14px; gap: 14px; }
+    .appt-layout { padding: 0; gap: 14px; }
     .appt-main { padding: 14px; }
     .appt-head { display: none; }                         /* 手机上隐藏表头 / hide table header on phones */
     .appt-row { grid-template-columns: 40px 1fr auto; row-gap: 6px; }
