@@ -3,6 +3,9 @@
 -- Datbase used is Supabase Postgres
 
 /*
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
 CREATE TABLE public.user_profiles (
   id uuid NOT NULL,
   username character varying NOT NULL UNIQUE,
@@ -111,9 +114,7 @@ CREATE TABLE public.wishlist_keywords (
 CREATE TABLE public.search_history (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   user_id uuid NOT NULL,
-  search_query character varying,
-  category character varying,
-  location character varying,
+  category character varying NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT search_history_pkey PRIMARY KEY (id),
   CONSTRAINT search_history_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.user_profiles(id)
