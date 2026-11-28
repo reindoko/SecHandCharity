@@ -1,7 +1,7 @@
 import { supabaseClient } from "/assets/js/supabase-client.js";
 import { attachLocationFilter } from "/assets/js/location.js";
 
-const CATALOGUE_URL = "/modules/account/settings.html"; // Rename once loh finish catalogue
+const CATALOGUE_URL = "/modules/catalogue/catalogue.html";
 
 // Ui helpers
 function setError(elementId, message = "") {
