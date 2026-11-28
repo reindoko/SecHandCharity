@@ -22,7 +22,7 @@
 
       if (session?.user) {
         await ensureUserProfile(session.user);
-        window.location.replace("/modules/account/settings.html"); // Rename once loh finish catalogue
+        window.location.replace("/modules/catalogue/catalogue.html");
       } else {
         window.location.replace("/modules/account/login.html");
       }
