@@ -3,8 +3,9 @@ import { attachLocationFilter } from "/assets/js/location.js";
 
 const ELIGIBLE_STATUS = "Available";
 const ITEMS_PER_PAGE = 12;
+const STORAGE_BUCKET = "photos";
 const ITEM_FIELDS =
-  "id, title, description, location, item_type, condition_type, delivery_type, photo_urls, status, created_at";
+  "id, donor_id, title, description, location, item_type, condition_type, delivery_type, photo_urls, status, created_at, donor:user_profiles!items_donor_id_fkey(username)";
 const CATEGORY_ITEM_TYPES = {
   clothes: "Clothing",
   books: "Books",
@@ -67,6 +68,10 @@ let selectedCategory = "";
 let showingOthersCategories = false;
 let catalogueLoaded = false;
 let currentPage = 1;
+let catalogueUserId = null;
+let latestViewedCategory = "";
+let categoryViewVersion = 0;
+let pendingCategoryPreferenceWrite = Promise.resolve();
 
 function setCatalogueState(state) {
   loadingState.hidden = state !== "loading";
@@ -100,24 +105,133 @@ function shuffle(items) {
   return shuffledItems;
 }
 
-function getPhotoUrl(photoValue) {
-  if (typeof photoValue !== "string" || !photoValue.trim()) {
-    return null;
+function hasCategory(category) {
+  return Object.prototype.hasOwnProperty.call(CATEGORY_ITEM_TYPES, category);
+}
+
+function orderItemsByCategory(items, preferredCategory) {
+  if (!preferredCategory) {
+    return shuffle(items);
   }
 
-  const trimmedValue = photoValue.trim();
-  let candidates = [trimmedValue];
+  const preferredItems = items.filter((item) => matchesCategory(item, preferredCategory));
+  const otherItems = items.filter((item) => !matchesCategory(item, preferredCategory));
+  return [...shuffle(preferredItems), ...shuffle(otherItems)];
+}
 
-  if (trimmedValue.startsWith("[")) {
-    try {
-      const parsed = JSON.parse(trimmedValue);
-      candidates = Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-      console.warn("Could not parse the item's photo_urls value.", error);
+async function getCatalogueUserId() {
+  try {
+    const { data, error } = await supabaseClient.auth.getUser();
+    if (error) {
+      console.error("Could not identify the signed-in Catalogue user.", error);
       return null;
     }
-  } else if (trimmedValue.includes(",")) {
-    candidates = trimmedValue.split(",");
+    return data.user?.id || null;
+  } catch (error) {
+    console.error("Could not identify the signed-in Catalogue user.", error);
+    return null;
+  }
+}
+
+async function waitForCategoryPreferenceWrites() {
+  let pendingWrite;
+  do {
+    pendingWrite = pendingCategoryPreferenceWrite;
+    await pendingWrite;
+  } while (pendingWrite !== pendingCategoryPreferenceWrite);
+}
+
+async function loadCategoryPreference(userId) {
+  await waitForCategoryPreferenceWrites();
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("user_category_browsing")
+      .select("category")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Could not load the Catalogue category preference.", error);
+      return "";
+    }
+    if (!data) {
+      return "";
+    }
+    if (typeof data.category === "string" && hasCategory(data.category)) {
+      return data.category;
+    }
+
+    console.error("The saved Catalogue category preference is invalid.", data.category);
+    return "";
+  } catch (error) {
+    console.error("Could not load the Catalogue category preference.", error);
+    return "";
+  }
+}
+
+async function saveCategoryPreference(userId, category) {
+  const { error } = await supabaseClient
+    .from("user_category_browsing")
+    .upsert(
+      {
+        user_id: userId,
+        category,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" }
+    );
+
+  if (error) {
+    throw error;
+  }
+}
+
+function queueCategoryPreferenceSave(userId, category) {
+  const write = pendingCategoryPreferenceWrite.then(() =>
+    saveCategoryPreference(userId, category)
+  );
+  pendingCategoryPreferenceWrite = write.catch((error) => {
+    console.error("Could not save the Catalogue category preference.", error);
+  });
+  return pendingCategoryPreferenceWrite;
+}
+
+function recordCategoryView(category) {
+  if (!hasCategory(category)) {
+    return;
+  }
+
+  latestViewedCategory = category;
+  categoryViewVersion += 1;
+  if (catalogueUserId) {
+    queueCategoryPreferenceSave(catalogueUserId, category);
+  }
+}
+
+function getPhotoUrl(photoValue) {
+  let candidates;
+
+  if (Array.isArray(photoValue)) {
+    candidates = photoValue;
+  } else if (typeof photoValue === "string" && photoValue.trim()) {
+    const trimmedValue = photoValue.trim();
+    candidates = [trimmedValue];
+
+    if (trimmedValue.startsWith("[") || trimmedValue.startsWith('"')) {
+      try {
+        const parsed = JSON.parse(trimmedValue);
+        candidates = Array.isArray(parsed) ? parsed : [parsed];
+      } catch {
+        if (trimmedValue.startsWith("[")) {
+          return null;
+        }
+      }
+    } else if (trimmedValue.includes(",")) {
+      candidates = trimmedValue.split(",");
+    }
+  } else {
+    return null;
   }
 
   for (const candidate of candidates) {
@@ -125,13 +239,30 @@ function getPhotoUrl(photoValue) {
       continue;
     }
 
+    const value = candidate.trim();
+
     try {
-      const url = new URL(candidate.trim(), window.location.href);
+      const url = new URL(value);
       if (url.protocol === "http:" || url.protocol === "https:") {
         return url.href;
       }
-    } catch {
       continue;
+    } catch {
+      if (/^[a-z][a-z\d+.-]*:/i.test(value)) {
+        continue;
+      }
+    }
+
+    const storagePath = value
+      .replace(/^\/+/, "")
+      .replace(new RegExp(`^(?:storage/v1/object/public/)?${STORAGE_BUCKET}/`, "i"), "");
+    if (!storagePath) {
+      continue;
+    }
+
+    const { data } = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(storagePath);
+    if (data?.publicUrl) {
+      return data.publicUrl;
     }
   }
 
@@ -165,10 +296,12 @@ function createLocationIcon() {
 }
 
 function createDonationCard(item) {
-  const card = document.createElement("a");
+  const card = document.createElement("article");
   card.className = "donation-card";
-  card.href = `/modules/item/item-details.html?${new URLSearchParams({ id: String(item.id) })}`;
-  card.setAttribute("aria-label", `View donation: ${item.title || "Untitled donation"}`);
+  const itemLink = document.createElement("a");
+  itemLink.className = "donation-card-main";
+  itemLink.href = `/modules/item/item-details.html?${new URLSearchParams({ id: String(item.id) })}`;
+  itemLink.setAttribute("aria-label", `View donation: ${item.title || "Untitled donation"}`);
 
   const photoUrl = getPhotoUrl(item.photo_urls);
   if (photoUrl) {
@@ -178,9 +311,9 @@ function createDonationCard(item) {
     image.alt = item.title ? `Photo of ${item.title}` : "Donated item";
     image.loading = "lazy";
     image.addEventListener("error", () => image.replaceWith(createPhotoPlaceholder()), { once: true });
-    card.append(image);
+    itemLink.append(image);
   } else {
-    card.append(createPhotoPlaceholder());
+    itemLink.append(createPhotoPlaceholder());
   }
 
   const body = document.createElement("div");
@@ -200,7 +333,30 @@ function createDonationCard(item) {
   location.append(locationText);
   body.append(location);
 
-  card.append(body);
+  itemLink.append(body);
+  card.append(itemLink);
+
+  const donorLine = document.createElement("p");
+  donorLine.className = "donation-card-donor";
+  donorLine.append(document.createTextNode("Posted by: "));
+
+  const donorId = typeof item.donor_id === "string" ? item.donor_id.trim() : "";
+  const donorUsername =
+    typeof item.donor?.username === "string" && item.donor.username.trim()
+      ? item.donor.username.trim()
+      : "Unknown";
+
+  if (donorId && donorUsername !== "Unknown") {
+    const donorLink = document.createElement("a");
+    donorLink.className = "donation-card-donor-link";
+    donorLink.href = `/modules/profile/profile.html?id=${encodeURIComponent(donorId)}`;
+    donorLink.textContent = donorUsername;
+    donorLine.append(donorLink);
+  } else {
+    donorLine.append(document.createTextNode(donorUsername));
+  }
+
+  card.append(donorLine);
   return card;
 }
 
@@ -296,18 +452,30 @@ function renderItems({ resetPage = false } = {}) {
 async function loadCatalogue() {
   catalogueLoaded = false;
   currentPage = 1;
+  const categoryViewVersionAtStart = categoryViewVersion;
   setCatalogueState("loading");
   resultsCount.textContent = "Loading donations...";
   donationGrid.replaceChildren();
 
+  const userId = await getCatalogueUserId();
+  catalogueUserId = userId;
+  if (userId && categoryViewVersion !== categoryViewVersionAtStart) {
+    await queueCategoryPreferenceSave(userId, latestViewedCategory);
+  }
+
   let data;
   let error;
+  let savedCategory = "";
 
   try {
-    const result = await supabaseClient
-      .from("items")
-      .select(ITEM_FIELDS)
-      .eq("status", ELIGIBLE_STATUS);
+    const [categoryPreference, result] = await Promise.all([
+      userId ? loadCategoryPreference(userId) : Promise.resolve(""),
+      supabaseClient
+        .from("items")
+        .select(ITEM_FIELDS)
+        .eq("status", ELIGIBLE_STATUS),
+    ]);
+    savedCategory = categoryPreference;
     data = result.data;
     error = result.error;
   } catch (requestError) {
@@ -324,7 +492,10 @@ async function loadCatalogue() {
     return;
   }
 
-  donationItems = shuffle(Array.isArray(data) ? data : []);
+  const preferredCategory = userId && categoryViewVersion !== categoryViewVersionAtStart
+    ? latestViewedCategory
+    : savedCategory;
+  donationItems = orderItemsByCategory(Array.isArray(data) ? data : [], preferredCategory);
   updateCategoryCounts(donationItems);
   catalogueLoaded = true;
   renderItems();
@@ -348,6 +519,7 @@ categoryGrid.addEventListener("click", (event) => {
     selectedCategory = "";
     showingOthersCategories = true;
   } else {
+    recordCategoryView(button.dataset.category);
     selectedCategory = selectedCategory === button.dataset.category
       ? ""
       : button.dataset.category;
@@ -364,6 +536,7 @@ othersSubcategoryGrid.addEventListener("click", (event) => {
     return;
   }
 
+  recordCategoryView(button.dataset.subcategory);
   selectedCategory = selectedCategory === button.dataset.subcategory
     ? ""
     : button.dataset.subcategory;

@@ -35,6 +35,7 @@ const reviewRating = document.getElementById("review-rating");
 const reviewComment = document.getElementById("review-comment");
 const reviewSubmit = document.getElementById("review-submit");
 const reviewCancel = document.getElementById("review-cancel");
+const reviewDeleteButton = document.getElementById("review-delete");
 const reviewFormStatus = document.getElementById("review-form-status");
 
 let profileId = null;
@@ -44,6 +45,8 @@ let isProfileOwner = false;
 let reviews = [];
 let reviewLoadError = null;
 let editingReviewId = null;
+let originalReviewRating = "5";
+let originalReviewComment = "";
 let activities = [];
 let activityPage = 1;
 let activityPageCount = 1;
@@ -121,15 +124,30 @@ function clearInlineError(element) {
 }
 
 function renderProfile(profile) {
+  messageLink.hidden = true;
+
   const name = profile.username || "Community member";
-  isProfileOwner = Boolean(viewer?.id && viewer.id === profile.id);
+  const viewerId = typeof viewer?.id === "string" ? viewer.id.trim() : "";
+  const ownerId = typeof profile.id === "string" ? profile.id.trim() : "";
+  isProfileOwner = Boolean(viewerId && ownerId && viewerId === ownerId);
+  const shouldShowMessage = Boolean(viewerId && ownerId && viewerId !== ownerId);
+
+  console.debug("[Public Profile] Message visibility check", {
+    viewerId: viewerId || null,
+    ownerId: ownerId || null,
+    viewerIdValid: Boolean(viewerId),
+    ownerIdValid: Boolean(ownerId),
+    idsMatch: isProfileOwner,
+    messageVisible: shouldShowMessage,
+  });
+
   profileName.textContent = name;
   profileLocation.textContent = profile.location || "Location not provided";
   profileAvatar.src = profile.avatar_url || DEFAULT_AVATAR;
   profileAvatar.alt = `${name}'s profile picture`;
   accountAge.textContent = formatAccountAge(profile.created_at);
   messageLink.href = `/modules/messaging/msg.html?user=${encodeURIComponent(profile.id)}`;
-  messageLink.hidden = isProfileOwner;
+  messageLink.hidden = !shouldShowMessage;
   document.title = `${name} | Public Profile`;
 }
 
@@ -210,7 +228,18 @@ function ownReview() {
   return viewer ? reviews.find((review) => review.reviewer_id === viewer.id) || null : null;
 }
 
+function updateReviewActionVisibility() {
+  const hasChanges =
+    reviewRating.value !== originalReviewRating ||
+    reviewComment.value !== originalReviewComment;
+
+  reviewCancel.hidden = !hasChanges;
+  reviewSubmit.hidden = editingReviewId !== null && !hasChanges;
+}
+
 function renderReviews() {
+  reviewDeleteButton.hidden = true;
+
   if (reviewLoadError) {
     reviewList.replaceChildren();
     setInlineError(reviewsError, reviewLoadError, "Reviews could not be loaded");
@@ -232,12 +261,6 @@ function renderReviews() {
         viewer && !isProfileOwner && review.reviewer_id === viewer.id
       );
       const author = isOwner ? "You" : (review.reviewer?.username || "Community member");
-      const actions = isOwner
-        ? `<div class="review-actions">
-             <button type="button" data-review-edit="${escapeHTML(review.id)}">Edit</button>
-             <button type="button" class="delete-review" data-review-delete="${escapeHTML(review.id)}">Delete</button>
-           </div>`
-        : "";
       return `<article class="review-card">
         <div class="review-card-heading">
           <div>
@@ -247,7 +270,6 @@ function renderReviews() {
           <span class="review-rating" aria-label="${rating} out of 5 stars">${"★".repeat(rating)}${"☆".repeat(5 - rating)}</span>
         </div>
         <p class="review-comment">${escapeHTML(review.comment)}</p>
-        ${actions}
       </article>`;
     }).join("");
   }
@@ -275,11 +297,15 @@ function renderReviews() {
 function restoreReviewEditor() {
   const existing = ownReview();
   editingReviewId = existing?.id ?? null;
-  reviewFormHeading.textContent = existing ? "Update your review" : "Write a review";
-  reviewSubmit.textContent = existing ? "Save changes" : "Post review";
-  reviewRating.value = existing ? String(existing.star_rating) : "5";
-  reviewComment.value = existing?.comment || "";
-  reviewCancel.hidden = !existing;
+  const isEditingReview = editingReviewId !== null;
+  reviewFormHeading.textContent = isEditingReview ? "Update your review" : "Write a review";
+  reviewSubmit.textContent = isEditingReview ? "Save changes" : "Post review";
+  originalReviewRating = existing ? String(existing.star_rating) : "5";
+  originalReviewComment = existing?.comment || "";
+  reviewRating.value = originalReviewRating;
+  reviewComment.value = originalReviewComment;
+  updateReviewActionVisibility();
+  reviewDeleteButton.hidden = false;
   reviewFormStatus.textContent = "";
   reviewFormStatus.className = "form-status";
 }
@@ -491,6 +517,11 @@ async function saveReview(event) {
       if (error) throw error;
     }
 
+    originalReviewRating = String(starRating);
+    originalReviewComment = comment;
+    reviewRating.value = originalReviewRating;
+    reviewComment.value = originalReviewComment;
+    updateReviewActionVisibility();
     await loadReviews();
     displayReviewFormMessage("Your review was saved.");
   } catch (error) {
@@ -501,19 +532,22 @@ async function saveReview(event) {
   }
 }
 
-async function deleteReview(reviewId) {
-  if (
-    !viewer ||
-    !profileId ||
-    isProfileOwner ||
-    !window.confirm("Delete your review? This cannot be undone.")
-  ) return;
+async function deleteReview() {
+  if (!viewer || !profileId || isProfileOwner) return;
+
+  const existing = ownReview();
+  if (!existing) {
+    displayReviewFormMessage("You do not have a review for this profile to delete.", true);
+    return;
+  }
+
+  if (!window.confirm("Delete your review? This cannot be undone.")) return;
 
   try {
     const { data, error } = await supabaseClient
       .from("reviews")
       .delete()
-      .eq("id", reviewId)
+      .eq("id", existing.id)
       .eq("reviewer_id", viewer.id)
       .eq("reviewed_user_id", profileId)
       .select("id")
@@ -533,24 +567,12 @@ async function deleteReview(reviewId) {
   }
 }
 
-function editReview(reviewId) {
-  const review = reviews.find((entry) => String(entry.id) === String(reviewId));
-  if (!viewer || isProfileOwner || !review || review.reviewer_id !== viewer.id) return;
-  editingReviewId = review.id;
-  reviewFormHeading.textContent = "Update your review";
-  reviewSubmit.textContent = "Save changes";
-  reviewRating.value = String(review.star_rating);
-  reviewComment.value = review.comment || "";
-  reviewCancel.hidden = false;
-  reviewFormStatus.textContent = "";
-  reviewForm.scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
 async function init() {
   profileAvatar.addEventListener("error", () => {
     profileAvatar.src = DEFAULT_AVATAR;
   }, { once: true });
 
+  console.debug("[Public Profile] Waiting for Supabase auth session.");
   try {
     const { data: { session }, error } = await supabaseClient.auth.getSession();
     if (error) {
@@ -564,8 +586,17 @@ async function init() {
     console.error("Could not verify the current user:", error);
   }
 
+  console.debug("[Public Profile] Supabase auth session resolved", {
+    viewerId: viewer?.id || null,
+    authError: viewerAuthError ? errorText(viewerAuthError) : null,
+  });
+
   const requestedId = new URLSearchParams(window.location.search).get("id");
   profileId = requestedId || viewer?.id || null;
+  console.debug("[Public Profile] Profile ID selected", {
+    requestedId: requestedId || null,
+    profileId,
+  });
   if (!profileId) {
     showPageError("A profile ID is required. Open this page with ?id=<user-id>.");
     return;
@@ -587,6 +618,10 @@ async function init() {
     return;
   }
 
+  console.debug("[Public Profile] Owner profile loaded", {
+    requestedProfileId: profileId,
+    ownerId: profile.id,
+  });
   renderProfile(profile);
   pageStatus.hidden = true;
   profileContent.hidden = false;
@@ -601,6 +636,11 @@ async function init() {
 reviewForm.addEventListener("submit", saveReview);
 messageLink.addEventListener("click", openConversation);
 reviewCancel.addEventListener("click", restoreReviewEditor);
+reviewDeleteButton.addEventListener("click", () => {
+  deleteReview();
+});
+reviewRating.addEventListener("change", updateReviewActionVisibility);
+reviewComment.addEventListener("input", updateReviewActionVisibility);
 activityRetry.addEventListener("click", () => loadActivityPage(activityRequestPage));
 activityPrevious.addEventListener("click", () => {
   if (!activityLoading && !activityPrevious.hidden) {
@@ -610,18 +650,6 @@ activityPrevious.addEventListener("click", () => {
 activityNext.addEventListener("click", () => {
   if (!activityLoading && !activityNext.hidden) {
     loadActivityPage(activityPage + 1);
-  }
-});
-reviewList.addEventListener("click", (event) => {
-  const editButton = event.target.closest("[data-review-edit]");
-  if (editButton) {
-    editReview(editButton.dataset.reviewEdit);
-    return;
-  }
-
-  const deleteButton = event.target.closest("[data-review-delete]");
-  if (deleteButton) {
-    deleteReview(deleteButton.dataset.reviewDelete);
   }
 });
 

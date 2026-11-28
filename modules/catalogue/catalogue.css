@@ -412,9 +412,14 @@
   border-radius: 11px;
   background: var(--catalogue-paper);
   color: inherit;
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+
+#catalogue-page .donation-card-main {
+  display: block;
+  color: inherit;
   cursor: pointer;
   text-decoration: none;
-  transition: box-shadow 150ms ease, transform 150ms ease;
 }
 
 #catalogue-page .donation-card:hover {
@@ -422,7 +427,7 @@
   transform: translateY(-2px);
 }
 
-#catalogue-page .donation-card:focus-visible {
+#catalogue-page .donation-card:focus-within {
   outline: 3px solid rgba(120, 173, 74, 0.55);
   outline-offset: 3px;
 }
@@ -493,6 +498,24 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.7;
+}
+
+#catalogue-page .donation-card-donor {
+  margin: 0;
+  padding: 0 13px 13px;
+  overflow-wrap: anywhere;
+  color: var(--catalogue-muted);
+  font-size: 12px;
+}
+
+#catalogue-page .donation-card-donor-link {
+  color: var(--catalogue-green-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+#catalogue-page .donation-card-donor-link:hover {
+  text-decoration: underline;
 }
 
 #catalogue-page .catalogue-state {
