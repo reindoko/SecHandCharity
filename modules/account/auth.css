@@ -1,5 +1,28 @@
 /* Full page style */
 .auth-page {
+  /* Color tokens / 颜色变量 */
+  --black: #000000;
+  --white: #ffffff;
+  --grey: #555555;
+
+  --info-border-green: #1c4a1d;
+  --info-fallback-dark-green: #26342d;
+  --info-overlay-dark-green: rgba(24, 48, 28, 0.24);
+  --text-shadow-black: rgba(0, 0, 0, 0.65);
+
+  --card-white-bg: rgba(255, 255, 255, 0.88);
+  --card-border-grey: rgba(85, 85, 85, 1.0);
+  --card-shadow-grey: rgba(85, 85, 85, 0.45);
+
+  --control-white-bg: rgba(255, 255, 255, 0.08);
+  --focus-green: #93bd69;
+  --focus-hover-light-green-bg: rgba(181, 222, 144, 0.2);
+  --button-hover-green: #94b375;
+  --link-hover-green: #396f3c;
+
+  --link-blue: #3b66f5;
+  --error-red: #c94040;
+
   min-height: 100vh;
   display: grid;
   place-items: center;
@@ -23,20 +46,63 @@
 
 /* Left info card style */
 .auth-info-card {
+  position: relative;
+  overflow: hidden;
   flex: 1 1 560px;
   max-width: 700px;
   min-height: 700px;
   padding: 40px 56px 40px 32px;
   margin-right: -36px;
   border-radius: 28px;
-  border: 2px solid #1c4a1d;
-  background: rgba(157, 219, 95, 0.5);
-  backdrop-filter: blur(12px);
+  border: 2px solid var(--info-border-green);
+  background-color: var(--info-fallback-dark-green);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   text-align: center;
-  color: #3c4f34;
+  color: var(--white);
+}
+
+.auth-info-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/assets/images/background-photo.jpeg");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  filter: blur(1px);
+  transform: scale(1.02);
+  z-index: 0;
+}
+
+.auth-info-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--info-overlay-dark-green);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.auth-info-card > * {
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 12px var(--text-shadow-black);
+}
+
+.auth-info-card h2 {
+  margin: 0;
+  font-size: 2.1rem;
+  font-weight: 700;
+}
+
+.auth-info-card h3 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 600;
 }
 
 /* Right auth card style */
@@ -47,15 +113,15 @@
   max-width: 560px;
   padding: 52px 48px;
   border-radius: 34px;
-  border: 4px solid rgba(85, 85, 85, 1.0);
-  background: rgba(255, 255, 255, 0.88);
+  border: 4px solid var(--card-border-grey);
+  background: var(--card-white-bg);
   backdrop-filter: blur(16px);
-  box-shadow: 0 18px 40px rgba(85, 85, 85, 0.45);
+  box-shadow: 0 18px 40px var(--card-shadow-grey);
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 20px;
-  color: #000000;
+  color: var(--black);
 }
 
 /* Auth card heading style */
@@ -74,14 +140,14 @@
   align-self: flex-start;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #000000;
+  color: var(--black);
   text-decoration: none;
   margin-bottom: -12px;
 }
 
 /* Hover on return button */
 .back-link:hover {
-  color: #396f3c;
+  color: var(--link-hover-green);
 }
 
 /* Arrow on return button */
@@ -112,7 +178,7 @@
   font-size: 0.8rem;
   font-weight: 500;
   line-height: 1;
-  color: #c94040;
+  color: var(--error-red);
 }
 
 /* Hide when no errors */
@@ -144,9 +210,9 @@
   height: 46px;
   padding: 0 20px;
   border-radius: 999px;
-  border: 1.5px solid #555555;
-  background: rgba(255, 255, 255, 0.08);
-  color: #000000;
+  border: 1.5px solid var(--grey);
+  background: var(--control-white-bg);
+  color: var(--black);
   font-size: 0.96rem;
   outline: none;
   transition: border-color 0.15s ease, background-color 0.15s ease;
@@ -154,13 +220,13 @@
 
 /* Default field text style */
 .pill-input::placeholder {
-  color: #555555;
+  color: var(--grey);
 }
 
 /* Pill focused style */
 .pill-input:focus {
-  border-color: #93bd69;
-  background: rgba(181, 222, 144, 0.2);
+  border-color: var(--focus-green);
+  background: var(--focus-hover-light-green-bg);
 }
 
 /* Padding to fit icon */
@@ -208,7 +274,7 @@
 
 /* Link text color */
 .auth-links a {
-  color: #3b66f5;
+  color: var(--link-blue);
   text-decoration: none;
 }
 
@@ -223,9 +289,9 @@
   height: 48px;
   margin-top: 4px;
   border-radius: 999px;
-  border: 1.5px solid #555555;
-  background: rgba(255, 255, 255, 0.08);
-  color: #000000;
+  border: 1.5px solid var(--grey);
+  background: var(--control-white-bg);
+  color: var(--black);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -234,8 +300,8 @@
 
 /* Hover on button */
 .btn-pill:hover {
-  background: rgba(181, 222, 144, 0.2);
-  border-color: #94b375;
+  background: var(--focus-hover-light-green-bg);
+  border-color: var(--button-hover-green);
 }
 
 /* Click button effect */
@@ -270,7 +336,7 @@
   gap: 12px;
   margin: 2px 0;
   font-size: 0.85rem;
-  color: #555555;
+  color: var(--grey);
 }
 
 /* Line style */
@@ -279,7 +345,7 @@
   content: "";
   flex: 1;
   height: 1px;
-  background: #555555;
+  background: var(--grey);
 }
 
 /* Screen size adjustments */

@@ -1,4 +1,50 @@
 .post-page {
+  /* Color tokens / 颜色变量 */
+  --white: #ffffff;
+  --near-black-ink: #181c18;
+  --placeholder-ink-dark: #1c201c;
+  --placeholder-hint-grey: #4a504a;
+  --muted-grey: #555b55;
+  --menu-border-grey: #555555;
+  --menu-option-ink: #111111;
+  --scrollbar-grey: #6e736e;
+  --scrollbar-hover-grey: #555955;
+
+  --glass-card-bg: rgba(242, 243, 242, 0.8);
+  --glass-white-hover: rgba(255, 255, 255, 0.92);
+  --glass-white-focus: rgba(255, 255, 255, 0.96);
+  --glass-white-box: rgba(255, 255, 255, 0.68);
+  --input-bg-grey: rgba(235, 236, 235, 0.82);
+
+  --border-dark-card: rgba(30, 34, 30, 0.78);
+  --border-dark-box: rgba(30, 34, 30, 0.75);
+  --border-dark-input: rgba(30, 34, 30, 0.45);
+  --divider-dark: rgba(30, 34, 30, 0.25);
+  --scrollbar-track-dark: rgba(30, 34, 30, 0.14);
+
+  --shadow-soft-black: rgba(0, 0, 0, 0.09);
+  --shadow-btn-black: rgba(0, 0, 0, 0.25);
+  --remove-btn-bg: rgba(24, 28, 24, 0.76);
+  --remove-btn-border: rgba(255, 255, 255, 0.92);
+
+  --title-green: #2b562b;
+  --hover-option-green-bg: rgba(148, 179, 117, 0.25);
+
+  --error-red: #b8291e;
+  --danger-hover-red: #c43b30;
+
+  --btn-cancel-bg: #8f938f;
+  --btn-cancel-hover: #777b77;
+  --btn-cancel-active: #606460;
+
+  --btn-draft-bg: #c7cac7;
+  --btn-draft-hover: #aeb2ae;
+  --btn-draft-active: #959995;
+
+  --btn-submit-bg: #a5d35c;
+  --btn-submit-hover: #8ab843;
+  --btn-submit-active: #719c2d;
+
   min-height: 100vh;
   width: 100%;
   display: flex;
@@ -27,16 +73,16 @@
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
-  color: #2b562b;
+  color: var(--title-green);
 }
 
 .post-card {
-  border: 1.5px solid rgba(30, 34, 30, 0.78);
+  border: 1.5px solid var(--border-dark-card);
   border-radius: 22px;
-  background: rgba(242, 243, 242, 0.8);
+  background: var(--glass-card-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.09);
+  box-shadow: 0 8px 28px var(--shadow-soft-black);
   overflow: visible;
 }
 
@@ -45,14 +91,14 @@
 }
 
 .post-section + .post-section {
-  border-top: 1px solid rgba(30, 34, 30, 0.25);
+  border-top: 1px solid var(--divider-dark);
 }
 
 /* Inline red error messages under each box/field */
 .inline-error {
   display: block;
   min-height: 0;
-  color: #b8291e;
+  color: var(--error-red);
   font-size: 0.82rem;
   font-weight: 500;
   line-height: 1.3;
@@ -72,7 +118,7 @@
 .photos-vertical-divider {
   width: 1px;
   align-self: stretch;
-  background: rgba(30, 34, 30, 0.25);
+  background: var(--divider-dark);
   flex-shrink: 0;
 }
 
@@ -94,7 +140,7 @@
   overflow-x: auto;
   padding-bottom: 14px;
   scrollbar-width: auto;
-  scrollbar-color: #6e736e rgba(30, 34, 30, 0.14);
+  scrollbar-color: var(--scrollbar-grey) var(--scrollbar-track-dark);
 }
 
 .extra-photos-row::-webkit-scrollbar {
@@ -102,17 +148,17 @@
 }
 
 .extra-photos-row::-webkit-scrollbar-track {
-  background: rgba(30, 34, 30, 0.14);
+  background: var(--scrollbar-track-dark);
   border-radius: 999px;
 }
 
 .extra-photos-row::-webkit-scrollbar-thumb {
-  background: #6e736e;
+  background: var(--scrollbar-grey);
   border-radius: 999px;
 }
 
 .extra-photos-row::-webkit-scrollbar-thumb:hover {
-  background: #555955;
+  background: var(--scrollbar-hover-grey);
 }
 
 .extra-photos-list {
@@ -151,9 +197,9 @@
   position: relative;
   width: 248px;
   height: 248px;
-  border: 1.5px solid rgba(30, 34, 30, 0.75);
+  border: 1.5px solid var(--border-dark-box);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.68);
+  background: var(--glass-white-box);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,8 +209,8 @@
 }
 
 .photo-box:hover {
-  background: rgba(255, 255, 255, 0.92);
-  border-color: #2b562b;
+  background: var(--glass-white-hover);
+  border-color: var(--title-green);
 }
 
 .photo-box--filled {
@@ -173,7 +219,7 @@
 }
 
 .photo-box--filled:hover {
-  border-color: rgba(30, 34, 30, 0.75);
+  border-color: var(--border-dark-box);
 }
 
 /* "+" sits just above center line; text sits just below center line */
@@ -184,7 +230,7 @@
   grid-template-rows: 1fr 1fr;
   justify-items: center;
   padding: 12px 14px;
-  color: #1c201c;
+  color: var(--placeholder-ink-dark);
 }
 
 .photo-plus {
@@ -215,7 +261,7 @@
 
 .photo-hint {
   font-size: 0.8rem;
-  color: #4a504a;
+  color: var(--placeholder-hint-grey);
   line-height: 1.25;
 }
 
@@ -238,14 +284,14 @@
   height: 28px;
   padding: 0;
   border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.92);
-  background: rgba(24, 28, 24, 0.76);
-  color: #ffffff;
+  border: 1.5px solid var(--remove-btn-border);
+  background: var(--remove-btn-bg);
+  color: var(--white);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 6px var(--shadow-btn-black);
   transition: background-color 0.15s ease, transform 0.1s ease;
 }
 
@@ -254,7 +300,7 @@
 }
 
 .photo-remove-circle:hover:not(:disabled) {
-  background: #c43b30;
+  background: var(--danger-hover-red);
   transform: scale(1.06);
 }
 
@@ -310,7 +356,7 @@
 .post-field-label {
   font-size: 1.08rem;
   font-weight: 700;
-  color: #181c18;
+  color: var(--near-black-ink);
   line-height: 1.2;
 }
 
@@ -330,9 +376,9 @@
 .post-input,
 .post-textarea {
   width: 100%;
-  border: 1px solid rgba(30, 34, 30, 0.45);
-  background: rgba(235, 236, 235, 0.82);
-  color: #181c18;
+  border: 1px solid var(--border-dark-input);
+  background: var(--input-bg-grey);
+  color: var(--near-black-ink);
   font-family: inherit;
   font-size: 0.98rem;
   outline: none;
@@ -355,8 +401,8 @@
 
 .post-input:focus,
 .post-textarea:focus {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: #2b562b;
+  background: var(--glass-white-focus);
+  border-color: var(--title-green);
 }
 
 /* Location input + arrow icon */
@@ -416,9 +462,9 @@
   height: 44px;
   padding: 0 14px;
   border-radius: 13px;
-  border: 1px solid rgba(30, 34, 30, 0.45);
-  background: rgba(235, 236, 235, 0.82);
-  color: #555b55;
+  border: 1px solid var(--border-dark-input);
+  background: var(--input-bg-grey);
+  color: var(--muted-grey);
   font-family: inherit;
   font-size: 0.94rem;
   display: flex;
@@ -430,7 +476,7 @@
 }
 
 .category-trigger.has-value {
-  color: #181c18;
+  color: var(--near-black-ink);
   font-weight: 500;
 }
 
@@ -463,9 +509,9 @@
   gap: 2px;
   padding: 6px;
   border-radius: 16px;
-  border: 1.5px solid #555555;
-  background-color: #ffffff;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+  border: 1.5px solid var(--menu-border-grey);
+  background-color: var(--white);
+  box-shadow: 0 10px 24px var(--shadow-soft-black);
 }
 
 .category-option {
@@ -480,25 +526,25 @@
   border-radius: 10px;
   font-size: 0.9rem;
   line-height: 1.25;
-  color: #111111;
+  color: var(--menu-option-ink);
   cursor: pointer;
   white-space: nowrap;
 }
 
 .category-option:hover,
 .category-option:focus-visible {
-  background-color: rgba(148, 179, 117, 0.25);
+  background-color: var(--hover-option-green-bg);
 }
 
 .category-option.is-selected {
   font-weight: 700;
-  color: #2b562b;
+  color: var(--title-green);
 }
 
 /* Bottom actions */
 .post-actions-bar {
   padding: 24px 46px;
-  border-top: 1px solid rgba(30, 34, 30, 0.25);
+  border-top: 1px solid var(--divider-dark);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -540,44 +586,44 @@
 }
 
 .post-btn--cancel {
-  background: #8f938f;
-  color: #181c18;
+  background: var(--btn-cancel-bg);
+  color: var(--near-black-ink);
 }
 
 .post-btn--cancel:hover:not(:disabled) {
-  background: #777b77;
+  background: var(--btn-cancel-hover);
 }
 
 .post-btn--cancel:active:not(:disabled) {
-  background: #606460;
+  background: var(--btn-cancel-active);
   transform: scale(0.98);
 }
 
 .post-btn--draft {
-  background: #c7cac7;
-  color: #181c18;
+  background: var(--btn-draft-bg);
+  color: var(--near-black-ink);
 }
 
 .post-btn--draft:hover:not(:disabled) {
-  background: #aeb2ae;
+  background: var(--btn-draft-hover);
 }
 
 .post-btn--draft:active:not(:disabled) {
-  background: #959995;
+  background: var(--btn-draft-active);
   transform: scale(0.98);
 }
 
 .post-btn--submit {
-  background: #a5d35c;
-  color: #181c18;
+  background: var(--btn-submit-bg);
+  color: var(--near-black-ink);
 }
 
 .post-btn--submit:hover:not(:disabled) {
-  background: #8ab843;
+  background: var(--btn-submit-hover);
 }
 
 .post-btn--submit:active:not(:disabled) {
-  background: #719c2d;
+  background: var(--btn-submit-active);
   transform: scale(0.98);
 }
 

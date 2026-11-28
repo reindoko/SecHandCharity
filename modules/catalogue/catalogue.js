@@ -6,6 +6,7 @@ const ITEMS_PER_PAGE = 12;
 const STORAGE_BUCKET = "photos";
 const ITEM_FIELDS =
   "id, donor_id, title, description, location, item_type, condition_type, delivery_type, photo_urls, status, created_at, donor:user_profiles!items_donor_id_fkey(username)";
+
 const CATEGORY_ITEM_TYPES = {
   clothes: "Clothing",
   books: "Books",
@@ -22,6 +23,7 @@ const CATEGORY_ITEM_TYPES = {
   "musical-instruments": "Musical Instruments",
   miscellaneous: "Miscellaneous",
 };
+
 const CATEGORY_LABELS = {
   clothes: "Clothes",
   books: "Books",
@@ -39,10 +41,21 @@ const CATEGORY_LABELS = {
   miscellaneous: "Miscellaneous",
 };
 
+const ITEM_TYPE_TO_SLUG = Object.fromEntries(
+  Object.entries(CATEGORY_ITEM_TYPES).map(([slug, itemType]) => [
+    itemType.toLocaleLowerCase(),
+    slug,
+  ])
+);
+
+const RECENCY_WEIGHTS = [6, 4, 2.5, 1.8, 1.4];
+const DEFAULT_CATEGORY_WEIGHT = 1;
+
 const searchForm = document.querySelector("#catalogue-search-form");
 const searchInput = document.querySelector("#catalogue-search-input");
 const locationFilter = document.querySelector("#catalogue-location-filter");
 const locationMenu = document.querySelector("#catalogue-location-menu");
+const cartCountEl = document.querySelector("#cart-count");
 const categorySection = document.querySelector("#category-section");
 const categoryGrid = document.querySelector("#category-grid");
 const othersCategoryView = document.querySelector("#others-category-view");
@@ -63,15 +76,16 @@ const errorMessage = document.querySelector("#error-message");
 const retryButton = document.querySelector("#retry-button");
 const resultsCount = document.querySelector("#items-result-count");
 
+let rawDonationItems = [];
 let donationItems = [];
+let activeRecentSlugs = [];
 let selectedCategory = "";
 let showingOthersCategories = false;
 let catalogueLoaded = false;
 let currentPage = 1;
 let catalogueUserId = null;
-let latestViewedCategory = "";
-let categoryViewVersion = 0;
-let pendingCategoryPreferenceWrite = Promise.resolve();
+let sessionRecentSlugs = [];
+let pendingHistoryWrite = Promise.resolve();
 
 function setCatalogueState(state) {
   loadingState.hidden = state !== "loading";
@@ -86,12 +100,23 @@ function normalizeText(value) {
   return typeof value === "string" ? value.trim().toLocaleLowerCase() : "";
 }
 
-function matchesCategory(item, category) {
-  if (!category) {
+function hasCategory(category) {
+  return Object.prototype.hasOwnProperty.call(CATEGORY_ITEM_TYPES, category);
+}
+
+function resolveCategorySlug(rawCategory) {
+  const normalized = normalizeText(rawCategory);
+  if (!normalized) return "";
+  if (hasCategory(normalized)) return normalized;
+  return ITEM_TYPE_TO_SLUG[normalized] || "";
+}
+
+function matchesCategory(item, categorySlug) {
+  if (!categorySlug) {
     return true;
   }
 
-  const itemType = CATEGORY_ITEM_TYPES[category];
+  const itemType = CATEGORY_ITEM_TYPES[categorySlug];
   return Boolean(itemType) && item.item_type === itemType;
 }
 
@@ -105,18 +130,58 @@ function shuffle(items) {
   return shuffledItems;
 }
 
-function hasCategory(category) {
-  return Object.prototype.hasOwnProperty.call(CATEGORY_ITEM_TYPES, category);
+function buildCategoryWeightMap(recentCategorySlugs) {
+  const weightMap = new Map();
+  recentCategorySlugs.forEach((slug, rank) => {
+    if (!weightMap.has(slug)) {
+      const weight = RECENCY_WEIGHTS[rank] ?? 1.2;
+      weightMap.set(slug, weight);
+    }
+  });
+  return weightMap;
 }
 
-function orderItemsByCategory(items, preferredCategory) {
-  if (!preferredCategory) {
-    return shuffle(items);
+function orderItemsWithRecencyBias(items, recentCategorySlugs) {
+  if (!Array.isArray(items) || items.length <= 1 || recentCategorySlugs.length === 0) {
+    return shuffle(items || []);
   }
 
-  const preferredItems = items.filter((item) => matchesCategory(item, preferredCategory));
-  const otherItems = items.filter((item) => !matchesCategory(item, preferredCategory));
-  return [...shuffle(preferredItems), ...shuffle(otherItems)];
+  const weightMap = buildCategoryWeightMap(recentCategorySlugs);
+  const pool = shuffle(items).map((item) => {
+    const slug = resolveCategorySlug(item.item_type);
+    const weight = weightMap.get(slug) ?? DEFAULT_CATEGORY_WEIGHT;
+    return { item, weight };
+  });
+
+  const ordered = [];
+  let totalWeight = pool.reduce((sum, entry) => sum + entry.weight, 0);
+
+  while (pool.length > 0) {
+    let target = Math.random() * totalWeight;
+    let chosenIndex = pool.length - 1;
+
+    for (let i = 0; i < pool.length; i += 1) {
+      target -= pool[i].weight;
+      if (target <= 0) {
+        chosenIndex = i;
+        break;
+      }
+    }
+
+    const [chosen] = pool.splice(chosenIndex, 1);
+    totalWeight -= chosen.weight;
+    ordered.push(chosen.item);
+  }
+
+  return ordered;
+}
+
+function reweightDonationItems() {
+  donationItems = orderItemsWithRecencyBias(rawDonationItems, activeRecentSlugs);
+}
+
+function hasActiveSearchOrLocation() {
+  return Boolean(searchInput.value.trim() || locationFilter.value.trim());
 }
 
 async function getCatalogueUserId() {
@@ -133,79 +198,140 @@ async function getCatalogueUserId() {
   }
 }
 
-async function waitForCategoryPreferenceWrites() {
-  let pendingWrite;
-  do {
-    pendingWrite = pendingCategoryPreferenceWrite;
-    await pendingWrite;
-  } while (pendingWrite !== pendingCategoryPreferenceWrite);
-}
+async function loadCartCount(userId) {
+  if (!cartCountEl) return;
 
-async function loadCategoryPreference(userId) {
-  await waitForCategoryPreferenceWrites();
-
-  try {
-    const { data, error } = await supabaseClient
-      .from("user_category_browsing")
-      .select("category")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Could not load the Catalogue category preference.", error);
-      return "";
-    }
-    if (!data) {
-      return "";
-    }
-    if (typeof data.category === "string" && hasCategory(data.category)) {
-      return data.category;
-    }
-
-    console.error("The saved Catalogue category preference is invalid.", data.category);
-    return "";
-  } catch (error) {
-    console.error("Could not load the Catalogue category preference.", error);
-    return "";
-  }
-}
-
-async function saveCategoryPreference(userId, category) {
-  const { error } = await supabaseClient
-    .from("user_category_browsing")
-    .upsert(
-      {
-        user_id: userId,
-        category,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "user_id" }
-    );
-
-  if (error) {
-    throw error;
-  }
-}
-
-function queueCategoryPreferenceSave(userId, category) {
-  const write = pendingCategoryPreferenceWrite.then(() =>
-    saveCategoryPreference(userId, category)
-  );
-  pendingCategoryPreferenceWrite = write.catch((error) => {
-    console.error("Could not save the Catalogue category preference.", error);
-  });
-  return pendingCategoryPreferenceWrite;
-}
-
-function recordCategoryView(category) {
-  if (!hasCategory(category)) {
+  if (!userId) {
+    cartCountEl.textContent = "0";
     return;
   }
 
-  latestViewedCategory = category;
-  categoryViewVersion += 1;
+  try {
+    const { data, error } = await supabaseClient
+      .from("cart_items")
+      .select("id")
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Could not load shopping cart item count.", error);
+      cartCountEl.textContent = "0";
+      return;
+    }
+
+    const count = Array.isArray(data) ? data.length : 0;
+    cartCountEl.textContent = count > 99 ? "99+" : String(count);
+  } catch (error) {
+    console.error("Could not load shopping cart item count.", error);
+    cartCountEl.textContent = "0";
+  }
+}
+
+async function waitForHistoryWrites() {
+  let pendingWrite;
+  do {
+    pendingWrite = pendingHistoryWrite;
+    await pendingWrite;
+  } while (pendingWrite !== pendingHistoryWrite);
+}
+
+async function loadRecentCategories(userId) {
+  await waitForHistoryWrites();
+
+  try {
+    const { data, error } = await supabaseClient
+      .from("search_history")
+      .select("category, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Could not load Catalogue category history.", error);
+      return [];
+    }
+
+    const seen = new Set();
+    const recentSlugs = [];
+
+    for (const row of data || []) {
+      const slug = resolveCategorySlug(row.category);
+      if (slug && !seen.has(slug)) {
+        seen.add(slug);
+        recentSlugs.push(slug);
+      }
+    }
+
+    return recentSlugs;
+  } catch (error) {
+    console.error("Could not load Catalogue category history.", error);
+    return [];
+  }
+}
+
+async function upsertCategoryHistory(userId, categorySlug) {
+  const categoryName = CATEGORY_ITEM_TYPES[categorySlug];
+  if (!categoryName) return;
+
+  const { data: existingRows, error: selectError } = await supabaseClient
+    .from("search_history")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("category", categoryName)
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (selectError) {
+    throw selectError;
+  }
+
+  if (Array.isArray(existingRows) && existingRows.length > 0) {
+    const { error: updateError } = await supabaseClient
+      .from("search_history")
+      .update({ created_at: new Date().toISOString() })
+      .eq("id", existingRows[0].id);
+
+    if (updateError) {
+      throw updateError;
+    }
+  } else {
+    const { error: insertError } = await supabaseClient
+      .from("search_history")
+      .insert({
+        user_id: userId,
+        category: categoryName,
+      });
+
+    if (insertError) {
+      throw insertError;
+    }
+  }
+}
+
+function queueCategoryHistoryWrite(userId, categorySlug) {
+  const write = pendingHistoryWrite.then(() =>
+    upsertCategoryHistory(userId, categorySlug)
+  );
+  pendingHistoryWrite = write.catch((error) => {
+    console.error("Could not update Catalogue category history.", error);
+  });
+  return pendingHistoryWrite;
+}
+
+function recordCategoryView(categorySlug) {
+  if (!hasCategory(categorySlug)) {
+    return;
+  }
+
+  sessionRecentSlugs = [
+    categorySlug,
+    ...sessionRecentSlugs.filter((slug) => slug !== categorySlug),
+  ];
+  activeRecentSlugs = [
+    categorySlug,
+    ...activeRecentSlugs.filter((slug) => slug !== categorySlug),
+  ];
+
   if (catalogueUserId) {
-    queueCategoryPreferenceSave(catalogueUserId, category);
+    queueCategoryHistoryWrite(catalogueUserId, categorySlug);
   }
 }
 
@@ -336,6 +462,19 @@ function createDonationCard(item) {
   itemLink.append(body);
   card.append(itemLink);
 
+  const categoryText = typeof item.item_type === "string" ? item.item_type.trim() : "";
+  if (categoryText) {
+    const categoryRow = document.createElement("div");
+    categoryRow.className = "donation-card-category-row";
+
+    const pill = document.createElement("span");
+    pill.className = "donation-card-category-pill";
+    pill.textContent = categoryText;
+    categoryRow.append(pill);
+
+    card.append(categoryRow);
+  }
+
   const donorLine = document.createElement("p");
   donorLine.className = "donation-card-donor";
   donorLine.append(document.createTextNode("Posted by: "));
@@ -364,7 +503,9 @@ function updateCategoryCounts(items) {
   for (const [category, itemType] of Object.entries(CATEGORY_ITEM_TYPES)) {
     const count = items.filter((item) => item.item_type === itemType).length;
     const countElement = categorySection.querySelector(`[data-count-for="${category}"]`);
-    countElement.textContent = `${count} ${count === 1 ? "item" : "items"}`;
+    if (countElement) {
+      countElement.textContent = `${count} ${count === 1 ? "item" : "items"}`;
+    }
   }
 }
 
@@ -452,30 +593,31 @@ function renderItems({ resetPage = false } = {}) {
 async function loadCatalogue() {
   catalogueLoaded = false;
   currentPage = 1;
-  const categoryViewVersionAtStart = categoryViewVersion;
   setCatalogueState("loading");
   resultsCount.textContent = "Loading donations...";
   donationGrid.replaceChildren();
 
   const userId = await getCatalogueUserId();
   catalogueUserId = userId;
-  if (userId && categoryViewVersion !== categoryViewVersionAtStart) {
-    await queueCategoryPreferenceSave(userId, latestViewedCategory);
+  loadCartCount(userId);
+
+  if (userId && sessionRecentSlugs.length > 0) {
+    await queueCategoryHistoryWrite(userId, sessionRecentSlugs[0]);
   }
 
   let data;
   let error;
-  let savedCategory = "";
+  let dbRecentSlugs = [];
 
   try {
-    const [categoryPreference, result] = await Promise.all([
-      userId ? loadCategoryPreference(userId) : Promise.resolve(""),
+    const [loadedSlugs, result] = await Promise.all([
+      userId ? loadRecentCategories(userId) : Promise.resolve([]),
       supabaseClient
         .from("items")
         .select(ITEM_FIELDS)
         .eq("status", ELIGIBLE_STATUS),
     ]);
-    savedCategory = categoryPreference;
+    dbRecentSlugs = loadedSlugs;
     data = result.data;
     error = result.error;
   } catch (requestError) {
@@ -492,11 +634,13 @@ async function loadCatalogue() {
     return;
   }
 
-  const preferredCategory = userId && categoryViewVersion !== categoryViewVersionAtStart
-    ? latestViewedCategory
-    : savedCategory;
-  donationItems = orderItemsByCategory(Array.isArray(data) ? data : [], preferredCategory);
-  updateCategoryCounts(donationItems);
+  activeRecentSlugs = [
+    ...sessionRecentSlugs,
+    ...dbRecentSlugs.filter((slug) => !sessionRecentSlugs.includes(slug)),
+  ];
+  rawDonationItems = Array.isArray(data) ? data : [];
+  reweightDonationItems();
+  updateCategoryCounts(rawDonationItems);
   catalogueLoaded = true;
   renderItems();
 }
@@ -504,10 +648,25 @@ async function loadCatalogue() {
 searchForm.addEventListener("submit", (event) => {
   event.preventDefault();
   locationMenu.classList.add("is-hidden");
+  if (!selectedCategory && !hasActiveSearchOrLocation()) {
+    reweightDonationItems();
+  }
   renderItems({ resetPage: true });
 });
 
-attachLocationFilter(locationFilter, locationMenu, () => renderItems({ resetPage: true }));
+searchInput.addEventListener("input", () => {
+  if (!selectedCategory && !hasActiveSearchOrLocation()) {
+    reweightDonationItems();
+    renderItems({ resetPage: true });
+  }
+});
+
+attachLocationFilter(locationFilter, locationMenu, () => {
+  if (!selectedCategory && !hasActiveSearchOrLocation()) {
+    reweightDonationItems();
+  }
+  renderItems({ resetPage: true });
+});
 
 categoryGrid.addEventListener("click", (event) => {
   const button = event.target.closest("[data-category]");
@@ -516,13 +675,22 @@ categoryGrid.addEventListener("click", (event) => {
   }
 
   if (button.dataset.category === "others") {
+    const wasUnfiltered = !selectedCategory;
     selectedCategory = "";
     showingOthersCategories = true;
+    if (!wasUnfiltered && !hasActiveSearchOrLocation()) {
+      reweightDonationItems();
+    }
   } else {
-    recordCategoryView(button.dataset.category);
-    selectedCategory = selectedCategory === button.dataset.category
+    const nextCategory = selectedCategory === button.dataset.category
       ? ""
       : button.dataset.category;
+    if (nextCategory) {
+      recordCategoryView(nextCategory);
+    } else if (!hasActiveSearchOrLocation()) {
+      reweightDonationItems();
+    }
+    selectedCategory = nextCategory;
     showingOthersCategories = false;
   }
 
@@ -536,17 +704,26 @@ othersSubcategoryGrid.addEventListener("click", (event) => {
     return;
   }
 
-  recordCategoryView(button.dataset.subcategory);
-  selectedCategory = selectedCategory === button.dataset.subcategory
+  const nextCategory = selectedCategory === button.dataset.subcategory
     ? ""
     : button.dataset.subcategory;
+  if (nextCategory) {
+    recordCategoryView(nextCategory);
+  } else if (!hasActiveSearchOrLocation()) {
+    reweightDonationItems();
+  }
+  selectedCategory = nextCategory;
   updateCategoryNavigation();
   renderItems({ resetPage: true });
 });
 
 backToCategories.addEventListener("click", () => {
+  const hadCategory = Boolean(selectedCategory);
   showingOthersCategories = false;
   selectedCategory = "";
+  if (hadCategory && !hasActiveSearchOrLocation()) {
+    reweightDonationItems();
+  }
   updateCategoryNavigation();
   renderItems({ resetPage: true });
 });

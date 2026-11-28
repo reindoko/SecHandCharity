@@ -1,3 +1,16 @@
+:root {
+  /* Color tokens / 颜色变量 */
+  --white: #ffffff;
+  --near-black: #111111;
+  --grey: #555555;
+  --muted-grey: #666666;
+
+  --bg-overlay-light-start: rgba(245, 245, 245, 0.5);
+  --bg-overlay-light-end: rgba(250, 250, 250, 0.6);
+  --dropdown-shadow-black: rgba(0, 0, 0, 0.14);
+  --option-hover-green-bg: rgba(148, 179, 117, 0.25);
+}
+
 /* All elemnts */
 *,
 *::before,
@@ -10,8 +23,8 @@ body {
   position: relative;
   margin: 0;
   font-family: sans-serif;
-  background-color: #ffffff;
-  color: #111111;
+  background-color: var(--white);
+  color: var(--near-black);
 }
 
 body::before {
@@ -19,9 +32,9 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background-color: #ffffff;
+  background-color: var(--white);
   background-image:
-    linear-gradient(rgba(245, 245, 245, 0.5), rgba(250, 250, 250, 0.6)),
+    linear-gradient(var(--bg-overlay-light-start), var(--bg-overlay-light-end)),
     url("/assets/images/background-photo.jpeg");
   background-size: cover;
   background-position: center;
@@ -57,9 +70,9 @@ body::before {
   gap: 2px;
   padding: 6px;
   border-radius: 16px;
-  border: 1.5px solid #555555;
-  background-color: #ffffff;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+  border: 1.5px solid var(--grey);
+  background-color: var(--white);
+  box-shadow: 0 10px 24px var(--dropdown-shadow-black);
 }
 
 /* Dropdown elements style */
@@ -72,7 +85,7 @@ body::before {
   border-radius: 10px;
   font-size: 0.9rem;
   line-height: 1.25;
-  color: #111111;
+  color: var(--near-black);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -80,13 +93,13 @@ body::before {
 /* Hover dropdown elements */
 .location-combobox .location-option-item:hover,
 .location-combobox .location-option-item:focus-visible {
-  background-color: rgba(148, 179, 117, 0.25);
+  background-color: var(--option-hover-green-bg);
 }
 
 /* Empty dropdown style */
 .location-combobox .location-option-empty {
   padding: 8px 12px;
   font-size: 0.85rem;
-  color: #666666;
+  color: var(--muted-grey);
   white-space: nowrap;
 }

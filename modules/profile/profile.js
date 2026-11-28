@@ -1,7 +1,8 @@
 import { supabaseClient } from "/assets/js/supabase-client.js";
 
 const ITEM_STATUS = "Available";
-const ITEM_PAGE_SIZE = 4;
+const COMPLETED_STATUS = "Completed";
+const ITEM_PAGE_SIZE = 6;
 const REVIEW_PAGE_SIZE = 100;
 const DEFAULT_AVATAR = "/assets/images/icon-account.png";
 const LOGIN_URL = "/modules/account/login.html";
@@ -15,6 +16,7 @@ const messageLink = document.getElementById("message-link");
 const ratingValue = document.getElementById("profile-rating");
 const ratingStars = document.getElementById("profile-rating-stars");
 const reviewCount = document.getElementById("profile-review-count");
+const donatedCount = document.getElementById("profile-donated");
 const postedCount = document.getElementById("profile-posted");
 const accountAge = document.getElementById("profile-age");
 const activityCount = document.getElementById("activity-count");
@@ -260,11 +262,15 @@ function renderReviews() {
       const isOwner = Boolean(
         viewer && !isProfileOwner && review.reviewer_id === viewer.id
       );
-      const author = isOwner ? "You" : (review.reviewer?.username || "Community member");
+      const reviewerId = typeof review.reviewer_id === "string" ? review.reviewer_id.trim() : "";
+      const label = isOwner ? "You" : (review.reviewer?.username || "Community member");
+      const authorMarkup = !isOwner && reviewerId
+        ? `<a class="review-author-link" href="/modules/profile/profile.html?id=${encodeURIComponent(reviewerId)}">${escapeHTML(label)}</a>`
+        : escapeHTML(label);
       return `<article class="review-card">
         <div class="review-card-heading">
           <div>
-            <div class="review-author">${escapeHTML(author)}</div>
+            <div class="review-author">${authorMarkup}</div>
             <div class="review-date">${escapeHTML(formatDate(review.created_at))}</div>
           </div>
           <span class="review-rating" aria-label="${rating} out of 5 stars">${"★".repeat(rating)}${"☆".repeat(5 - rating)}</span>
@@ -379,6 +385,34 @@ async function loadReviews() {
 
   reviews = loadedReviews;
   renderReviews();
+}
+
+async function loadDonatedCount() {
+  if (!donatedCount) return;
+
+  try {
+    const { count, error } = await supabaseClient
+      .from("items")
+      .select("id", { count: "exact", head: true })
+      .eq("donor_id", profileId)
+      .ilike("status", COMPLETED_STATUS);
+
+    if (error) {
+      donatedCount.textContent = "Unavailable";
+      console.error("Could not count completed profile donations:", error.message);
+      return;
+    }
+
+    if (count === null) {
+      donatedCount.textContent = "Unavailable";
+      return;
+    }
+
+    donatedCount.textContent = String(count);
+  } catch (error) {
+    donatedCount.textContent = "Unavailable";
+    console.error("Could not count completed profile donations:", error);
+  }
 }
 
 async function loadItemCount() {
@@ -628,6 +662,7 @@ async function init() {
 
   await Promise.all([
     loadReviews(),
+    loadDonatedCount(),
     loadItemCount(),
     loadActivityPage(1),
   ]);

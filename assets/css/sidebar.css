@@ -1,5 +1,31 @@
 /* 两栏布局(记得保留这段) */
 .app-layout {
+  /* Color tokens / 颜色变量 */
+  --white: #ffffff;
+  --glass-white-high: rgba(255, 255, 255, 0.7);
+  --glass-white-mid: rgba(255, 255, 255, 0.55);
+  --glass-white-soft: rgba(255, 255, 255, 0.45);
+  --glass-white-hover: rgba(255, 255, 255, 0.4);
+  --glass-white-border: rgba(255, 255, 255, 0.6);
+  --glass-white-border-soft: rgba(255, 255, 255, 0.55);
+  --glass-white-border-faint: rgba(255, 255, 255, 0.5);
+  --glass-white-border-active: rgba(255, 255, 255, 0.45);
+  --glass-white-border-avatar: rgba(255, 255, 255, 0.7);
+  --glass-white-subtle: rgba(255, 255, 255, 0.35);
+  --glass-white-low: rgba(255, 255, 255, 0.25);
+  --glass-white-faint: rgba(255, 255, 255, 0.18);
+
+  --dark-green: #1f3a2a;
+  --dark-green-profile: #14271c;
+  --dark-green-muted: rgba(31, 58, 42, 0.6);
+  --shadow-dark-green: rgba(31, 60, 40, 0.18);
+  --shadow-dark-green-soft: rgba(31, 60, 40, 0.10);
+
+  --active-green-start: rgba(92, 184, 92, 0.85);
+  --active-green-end: rgba(69, 176, 57, 0.7);
+  --active-green-shadow: rgba(69, 176, 57, 0.3);
+  --avatar-ring-green: rgba(92, 184, 92, 0.6);
+
   display: flex;
   align-items: flex-start;
   min-height: 100vh;
@@ -22,16 +48,16 @@
   /* 毛玻璃核心 */
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.45),
-    rgba(255, 255, 255, 0.18)
+    var(--glass-white-soft),
+    var(--glass-white-faint)
   );
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--glass-white-border-soft);
   border-radius: 24px;
   box-shadow:
-    0 8px 32px rgba(31, 60, 40, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);   /* 顶部高光 */
+    0 8px 32px var(--shadow-dark-green),
+    inset 0 1px 0 var(--glass-white-border);   /* 顶部高光 */
 }
 
 #sidebar::-webkit-scrollbar { width: 0; }
@@ -53,7 +79,7 @@
   padding: 18px 20px;
   border-radius: 14px;
   text-decoration: none;
-  color: #1f3a2a;                  /* 深绿文字 */
+  color: var(--dark-green);                  /* 深绿文字 */
   font-weight: 500;
   font-size: 17px;
   transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
@@ -65,23 +91,23 @@
   margin-bottom: 12px;
   border-radius: 18px;
   gap: 14px;
-  color: #14271c;
+  color: var(--dark-green-profile);
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.55),
-    rgba(255, 255, 255, 0.25)
+    var(--glass-white-mid),
+    var(--glass-white-low)
   );
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--glass-white-border);
   box-shadow:
-    0 4px 16px rgba(31, 60, 40, 0.10),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    0 4px 16px var(--shadow-dark-green-soft),
+    inset 0 1px 0 var(--glass-white-high);
 }
 
 .sidebar-profile:hover {
   background: linear-gradient(
     145deg,
-    rgba(255, 255, 255, 0.7),
-    rgba(255, 255, 255, 0.35)
+    var(--glass-white-high),
+    var(--glass-white-subtle)
   );
   transform: translateY(-1px);
 }
@@ -89,8 +115,8 @@
 .sidebar-profile .sidebar-avatar {
   width: 52px;
   height: 52px;
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 2px rgba(92, 184, 92, 0.6);  /* 绿色描边环,保留品牌色 */
+  border: 2px solid var(--white);
+  box-shadow: 0 0 0 2px var(--avatar-ring-green);  /* 绿色描边环,保留品牌色 */
 }
 
 .sidebar-profile-info {
@@ -110,7 +136,7 @@
 .sidebar-profile-sub {
   font-size: 13px;
   font-weight: 400;
-  color: rgba(31, 58, 42, 0.6);
+  color: var(--dark-green-muted);
 }
 
 .sidebar-links .sidebar-link:nth-child(2) {
@@ -119,8 +145,8 @@
 
 /* 悬停:更亮的小玻璃块 */
 .sidebar-link:hover:not(.is-active) {
-  background-color: rgba(255, 255, 255, 0.4);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  background-color: var(--glass-white-hover);
+  box-shadow: inset 0 0 0 1px var(--glass-white-border-faint);
   transform: translateX(3px);
 }
 
@@ -128,15 +154,15 @@
 .sidebar-link.is-active {
   background: linear-gradient(
     135deg,
-    rgba(92, 184, 92, 0.85),
-    rgba(69, 176, 57, 0.7)
+    var(--active-green-start),
+    var(--active-green-end)
   );
-  color: #ffffff;
+  color: var(--white);
   font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--glass-white-border-active);
   box-shadow:
-    0 4px 14px rgba(69, 176, 57, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    0 4px 14px var(--active-green-shadow),
+    inset 0 1px 0 var(--glass-white-border-active);
 }
 
 .sidebar-avatar {
@@ -144,7 +170,7 @@
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.7);
+  border: 2px solid var(--glass-white-border-avatar);
 }
 
 /* 图标恢复原来的深色,不需要 filter */

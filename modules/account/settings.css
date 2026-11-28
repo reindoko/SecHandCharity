@@ -5,6 +5,54 @@
 }
 
 .settings-panel {
+  /* Color tokens / 颜色变量 */
+  --white: #ffffff;
+  --off-white-tint: #f4fbf4;
+  --glass-white-high: rgba(255, 255, 255, 0.92);
+  --glass-white-secondary: rgba(255, 255, 255, 0.85);
+  --glass-white-border-ring: rgba(255, 255, 255, 0.85);
+  --glass-white-border: rgba(255, 255, 255, 0.7);
+  --glass-white-border-soft: rgba(255, 255, 255, 0.65);
+  --glass-white-mid: rgba(255, 255, 255, 0.5);
+  --glass-white-soft: rgba(255, 255, 255, 0.4);
+
+  --black-ink: #111111;
+  --dark-ink: #181c18;
+  --charcoal-ink: #1e221e;
+  --label-dark: #222622;
+  --secondary-btn-ink: #3a3f3a;
+  --locked-grey-ink: #525752;
+  --muted-grey: #555b55;
+  --neutral-grey: #8a8f8a;
+  --hover-neutral-grey: #717671;
+  --locked-bg-grey: rgba(180, 180, 180, 0.6);
+  --avatar-placeholder-grey: #e2e6e1;
+
+  --shadow-black-soft: rgba(0, 0, 0, 0.03);
+  --shadow-black-card: rgba(0, 0, 0, 0.04);
+  --shadow-black-btn: rgba(0, 0, 0, 0.05);
+  --shadow-black-box: rgba(0, 0, 0, 0.06);
+  --divider-black-soft: rgba(0, 0, 0, 0.08);
+  --border-black-subtle: rgba(0, 0, 0, 0.14);
+  --border-black-locked: rgba(0, 0, 0, 0.16);
+
+  --brand-green: #439a46;
+  --hover-green: #357f38;
+  --title-green: #2b562b;
+  --hover-title-green: #1f411f;
+  --banner-green: rgba(67, 154, 70, 0.92);
+  --focus-ring-green: rgba(67, 154, 70, 0.15);
+  --hover-icon-green: rgba(67, 154, 70, 0.12);
+  --shadow-banner-green: rgba(67, 154, 70, 0.18);
+  --shadow-btn-green: rgba(67, 154, 70, 0.22);
+
+  --star-gold: #e29b28;
+
+  --danger-red: #d94338;
+  --hover-danger-red: #bd3228;
+  --confirm-danger-red: #961d14;
+  --note-danger-red: #c9382e;
+
   display: flex;
   flex-direction: column;
   gap: 36px;
@@ -30,14 +78,14 @@
   margin: 0;
   font-size: 1.45rem;
   font-weight: 700;
-  color: #2b562b;
+  color: var(--title-green);
 }
 
 .public-profile-link {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: #2b562b;
+  color: var(--title-green);
   text-decoration: none;
   border-radius: 8px;
   cursor: pointer;
@@ -45,22 +93,22 @@
 }
 
 .public-profile-link:hover {
-  color: #1f411f;
+  color: var(--hover-title-green);
   opacity: 0.85;
 }
 
 .public-profile-link:focus-visible {
-  outline: 2px solid #439a46;
+  outline: 2px solid var(--brand-green);
   outline-offset: 4px;
 }
 
 .settings-box {
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--glass-white-border);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--glass-white-mid);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px var(--shadow-black-box);
 }
 
 /* Account card */
@@ -78,10 +126,10 @@
   align-items: center;
   gap: 12px;
   padding: 16px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--glass-white-border-soft);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  background: var(--glass-white-soft);
+  box-shadow: 0 2px 10px var(--shadow-black-card);
   align-self: start;
 }
 
@@ -90,7 +138,7 @@
   height: 98px;
   border-radius: 50%;
   overflow: hidden;
-  background: #e2e6e1;
+  background: var(--avatar-placeholder-grey);
 }
 
 .settings-avatar-frame img {
@@ -104,8 +152,8 @@
   padding: 8px 16px;
   border: none;
   border-radius: 999px;
-  background: #439a46;
-  color: #ffffff;
+  background: var(--brand-green);
+  color: var(--white);
   font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
@@ -113,7 +161,7 @@
 }
 
 .settings-btn-green:hover {
-  background: #357f38;
+  background: var(--hover-green);
 }
 
 .settings-col-fields,
@@ -139,7 +187,7 @@
 .settings-row label {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #222622;
+  color: var(--label-dark);
 }
 
 .settings-row .field-error {
@@ -161,12 +209,12 @@
   height: 42px;
   padding: 0 40px 0 18px;
   border-radius: 999px;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  background: rgba(255, 255, 255, 0.92);
-  color: #1e221e;
+  border: 1px solid var(--border-black-subtle);
+  background: var(--glass-white-high);
+  color: var(--charcoal-ink);
   font-size: 0.92rem;
   outline: none;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 4px var(--shadow-black-soft);
   transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -176,10 +224,10 @@
 
 .settings-pill-input:not([readonly]),
 .settings-pill-input:focus {
-  border-color: #439a46;
-  background: #ffffff;
-  color: #111111;
-  box-shadow: 0 0 0 3px rgba(67, 154, 70, 0.15);
+  border-color: var(--brand-green);
+  background: var(--white);
+  color: var(--black-ink);
+  box-shadow: 0 0 0 3px var(--focus-ring-green);
   cursor: text;
 }
 
@@ -188,9 +236,9 @@
 .settings-pill-input--locked:focus,
 .settings-pill-input--locked:not([readonly]) {
   padding-right: 18px;
-  background: rgba(180, 180, 180, 0.6);
-  border-color: rgba(0, 0, 0, 0.16);
-  color: #525752;
+  background: var(--locked-bg-grey);
+  border-color: var(--border-black-locked);
+  color: var(--locked-grey-ink);
   box-shadow: none;
   cursor: default;
   pointer-events: none;
@@ -214,7 +262,7 @@
 
 .edit-icon-btn:hover,
 .dropdown-icon-btn:hover {
-  background: rgba(67, 154, 70, 0.12);
+  background: var(--hover-icon-green);
 }
 
 .edit-icon-btn img,
@@ -233,11 +281,11 @@
   margin-top: 16px;
   padding: 14px 20px;
   border-radius: 999px;
-  background: rgba(67, 154, 70, 0.92);
-  color: #f4fbf4;
+  background: var(--banner-green);
+  color: var(--off-white-tint);
   font-size: 0.85rem;
   line-height: 1.35;
-  box-shadow: 0 2px 10px rgba(67, 154, 70, 0.18);
+  box-shadow: 0 2px 10px var(--shadow-banner-green);
 }
 
 .privacy-info-icon {
@@ -245,8 +293,8 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  color: #ffffff;
+  border: 2px solid var(--glass-white-border-ring);
+  color: var(--white);
   font-weight: 800;
   font-size: 0.82rem;
   display: grid;
@@ -271,28 +319,28 @@
   padding: 9px 22px;
   border-radius: 999px;
   border: none;
-  background: #439a46;
-  color: #ffffff;
+  background: var(--brand-green);
+  color: var(--white);
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(67, 154, 70, 0.22);
+  box-shadow: 0 2px 8px var(--shadow-btn-green);
   transition: background-color 0.15s ease;
 }
 
 .pill-action-btn:hover {
-  background: #357f38;
+  background: var(--hover-green);
 }
 
 .pill-action-btn--secondary {
-  background: rgba(255, 255, 255, 0.85);
-  color: #3a3f3a;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  background: var(--glass-white-secondary);
+  color: var(--secondary-btn-ink);
+  border: 1px solid var(--border-black-subtle);
+  box-shadow: 0 2px 6px var(--shadow-black-btn);
 }
 
 .pill-action-btn--secondary:hover {
-  background: #ffffff;
-  color: #111111;
+  background: var(--white);
+  color: var(--black-ink);
 }
 
 /* Stats strip */
@@ -304,7 +352,7 @@
 
 .stat-box {
   padding: 24px 22px;
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  border-right: 1px solid var(--divider-black-soft);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -318,7 +366,7 @@
 .stat-title {
   font-size: 0.88rem;
   font-weight: 600;
-  color: #555b55;
+  color: var(--muted-grey);
 }
 
 .stat-metric {
@@ -327,11 +375,11 @@
   gap: 8px;
   font-size: 1.38rem;
   font-weight: 700;
-  color: #181c18;
+  color: var(--dark-ink);
 }
 
 .stat-stars {
-  color: #e29b28;
+  color: var(--star-gold);
   font-size: 1.08rem;
   letter-spacing: 1px;
 }
@@ -359,7 +407,7 @@
   height: 44px;
   border: none;
   border-radius: 999px;
-  color: #ffffff;
+  color: var(--white);
   font-size: 0.96rem;
   font-weight: 600;
   cursor: pointer;
@@ -367,23 +415,23 @@
 }
 
 .restricted-btn--neutral {
-  background: #8a8f8a;
+  background: var(--neutral-grey);
 }
 
 .restricted-btn--neutral:hover {
-  background: #717671;
+  background: var(--hover-neutral-grey);
 }
 
 .restricted-btn--danger {
-  background: #d94338;
+  background: var(--danger-red);
 }
 
 .restricted-btn--danger:hover {
-  background: #bd3228;
+  background: var(--hover-danger-red);
 }
 
 .restricted-btn--danger.is-confirming {
-  background: #961d14;
+  background: var(--confirm-danger-red);
 }
 
 .restricted-note {
@@ -392,11 +440,11 @@
 }
 
 .restricted-note--neutral {
-  color: #555b55;
+  color: var(--muted-grey);
 }
 
 .restricted-note--danger {
-  color: #c9382e;
+  color: var(--note-danger-red);
 }
 
 @media (max-width: 960px) {
